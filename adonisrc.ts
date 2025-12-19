@@ -15,8 +15,8 @@ export default defineConfig({
     mergeMultipartFieldsAndFiles: true,
     shutdownInReverseOrder: true,
   },
-  
-  
+
+
 
   /*
   |--------------------------------------------------------------------------
@@ -27,7 +27,7 @@ export default defineConfig({
   | will be scanned automatically from the "./commands" directory.
   |
   */
-  commands: [() => import('@adonisjs/core/commands')],
+  commands: [() => import('@adonisjs/core/commands'), () => import('@adonisjs/session/commands')],
 
   /*
   |--------------------------------------------------------------------------
@@ -45,6 +45,8 @@ export default defineConfig({
       file: () => import('@adonisjs/core/providers/repl_provider'),
       environment: ['repl', 'test'],
     },
+    () => import('@adonisjs/session/session_provider'),
+    () => import('@adonisjs/core/providers/edge_provider')
   ],
 
   /*
@@ -81,4 +83,8 @@ export default defineConfig({
     ],
     forceExit: false,
   },
+  metaFiles: [{
+    pattern: 'resources/views/**/*.edge',
+    reloadServer: false,
+  }]
 })
