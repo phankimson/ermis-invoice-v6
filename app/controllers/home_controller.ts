@@ -1,7 +1,6 @@
 // import type { HttpContext } from '@adonisjs/core/http'
 import  svgCaptcha  from 'svg-captcha';
 import type { HttpContext } from '@adonisjs/core/http'
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import * as HDDT from '../common/hoadondientu/index.js';
 
 export default class HomeController {
@@ -33,15 +32,10 @@ export default class HomeController {
         await help.login(url, usename, password);
     }
 
-    public async check_invoice({ response }: HttpContext , { params }: HttpContextContract) {
+    public async check_invoice({ response , params }: HttpContext ) {
         const help = new HDDT.default();
         const url = 'https://hoadondientu.gdt.gov.vn/';
-        const tax_code = params.tax_code;
-        const invoice_no = params.invoice_no;
-        const invoice_code = params.invoice_code;
-        const tax_amount = params.tax_amount;
-        const amount = params.amount;
-        const result = await help.checkInvoice(url, invoice_no, invoice_code, tax_code, tax_amount, amount);
+        const result = await help.checkInvoice(url, params);
         response.status(200).send(result);
     }
 }

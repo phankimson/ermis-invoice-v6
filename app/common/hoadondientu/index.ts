@@ -81,7 +81,7 @@ class Help {
             await page.click(selector + " .ButtonAnt__Button-sc-p5q16s-0");
   }
 
-  async checkInvoice(url:string = "https://hoadondientu.gdt.gov.vn/", invoice_no:string, invoice_code:string, tax_code:string, tax_amount:number,amount:number ) {
+  async checkInvoice(url:string = "https://hoadondientu.gdt.gov.vn/", obj:any ) {
          const browser = await launch({ headless: false , defaultViewport: null }); // khởi tạo browser
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'domcontentloaded'}); // điều hướng trang web theo URL
@@ -89,24 +89,26 @@ class Help {
 
             const text:string = await this.captcha(page,".home-tabs-search .Captcha__Image-sc-1up1k1e-1");
 
-            await this.fillCheckInvoice(".home-tabs-search", page, text, invoice_no, invoice_code, tax_code, tax_amount, amount);
+            await this.fillCheckInvoice(".home-tabs-search", page, text, obj);
             const result = await this.loadCheckInvoice(".styles__SearchContentBox-sc-1ljhobs-0", page);
             //await browser.close();
             return result;
   }
 
-  async fillCheckInvoice(selector:string, page:any, text:string , invoice_no:string , invoice_code:string, tax_code:string, tax_amount:number,amount:number ) {
+  async fillCheckInvoice(selector:string, page:any, text:string , obj: any ) {
               // Type the credentials into the form fields
             await page.waitForSelector(selector + " #nbmst");
-            await page.type(selector + " #nbmst", tax_code, { delay: 100 }); // Replace tax code with the actual selector for the username/email input field
+            await page.type(selector + " #nbmst", obj.tax_code, { delay: 100 }); // Replace tax code with the actual selector for the username/email input field
+            await page.click(selector + ' .ant-select-selection__rendered');
+            await page.click('.ant-select-dropdown-menu-item:nth-child('+obj.invoice_type+')'); // Select invoice type
             await page.waitForSelector(selector + " #khhdon");
-            await page.type(selector + " #khhdon", invoice_code, { delay: 100 }); // Replace invoice code with the actual selector for the password input field
+            await page.type(selector + " #khhdon", obj.invoice_code, { delay: 100 }); // Replace invoice code with the actual selector for the password input field
             await page.waitForSelector(selector + " #shdon");
-            await page.type(selector + " #shdon", invoice_no, { delay: 100 }); // Replace invoice no with the actual selector for the password input field
+            await page.type(selector + " #shdon", obj.invoice_no, { delay: 100 }); // Replace invoice no with the actual selector for the password input field
             await page.waitForSelector(selector + " #tgtthue");
-            await page.type(selector + " #tgtthue", tax_amount.toString(), { delay: 100 }); // Replace tax amount with the actual selector for the password input field
+            await page.type(selector + " #tgtthue", obj.tax_amount.toString(), { delay: 100 }); // Replace tax amount with the actual selector for the password input field
             await page.waitForSelector(selector + " #tgtttbso");
-            await page.type(selector + " #tgtttbso", amount.toString(), { delay: 100 }); // Replace amount with the actual selector for the password input field
+            await page.type(selector + " #tgtttbso", obj.amount.toString(), { delay: 100 }); // Replace amount with the actual selector for the password input field
             await page.waitForSelector(selector + " #cvalue");
             await page.type(selector + " #cvalue", text, { delay: 100 });
             // Click the "Sign In" button to complete the login process.
@@ -122,9 +124,7 @@ class Help {
                 const pContents = Array.from(pElements).map(el => el.textContent);                
                 // Return the serializable array back to the Node.js environment
                 return pContents;
-          }, selector); // 1. pass variable as an argument 
-        // 1. Wait for the selector to appear       
-        //const allPText = await page.$$eval(selector + ' p', els => els.map(el => el.textContent));
+          }, selector); // 1. pass variable as an argument   
         return allPText;
   }
 }

@@ -19,7 +19,9 @@ router
   .group(() => {
     router
       .group(() => {
-        router.get('/check-invoice/:tax_code/:invoice_no/:invoice_code/:tax_amount/:amount',  [HomeController, 'check_invoice']).as('invoice.check') // final name
+        router.get('/check-invoice/:tax_code/:invoice_type/:invoice_no/:invoice_code/:tax_amount/:amount',  [HomeController, 'check_invoice']).as('invoice.check') // final name
+        // run testing
+        // http://localhost:3333/api/v1/check-invoice/3101127110/1/4095/C25TNM/48000/648000
       })
       .prefix('v1')
       .as('v1')
