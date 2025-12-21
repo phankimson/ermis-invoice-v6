@@ -19,6 +19,8 @@ export default await Env.create(new URL('../', import.meta.url), {
   LOG_LEVEL: Env.schema.string(),
   SECRET_KEY: Env.schema.string(),
   CONTACT_ADMIN: Env.schema.string(),
+  URL_HOADONDIENTU: Env.schema.string({ format: 'url' }),
+  COUNT_LOGIN_FAIL: Env.schema.number(),
 
   /*
   |----------------------------------------------------------

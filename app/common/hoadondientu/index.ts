@@ -1,17 +1,23 @@
 'use strict';
-import { launch } from 'puppeteer';
+import puppeteer from 'puppeteer';
 import * as cheerio from 'cheerio';
+import env from '#start/env'
 
 class Help {
-  async login(url: string = "https://hoadondientu.gdt.gov.vn/",username: string, password: string) {
-    const browser = await launch({ headless: false }); // khởi tạo browser
+  async login(url: string = env.get('URL_HOADONDIENTU'), username: string, password: string) {
+    const browser = await puppeteer.launch({ headless: false , defaultViewport: null}); // khởi tạo browser
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL
             await page.click("button.ant-modal-close");
-            await page.click("button.ant-btn-icon-only");
-    
-            // Click the element handle
-            page.$eval('.header-item:last-child span', element =>
+            // Click the open login form mobile
+            //await page.click("button.ant-btn-icon-only");    
+          
+            //page.$eval('.header-item:last-child span', element =>
+            //    element.click()
+            //);              
+            //console.log('Browser WSEndpoint:', browserWSEndpoint);
+            // Click the open login form desktop            
+            page.$eval('.home-header-menu-item:last-child span', element =>
                 element.click()
             );    
            
@@ -21,16 +27,55 @@ class Help {
             await this.fillLogin(".home-tabs-login", page, text, username, password);
             // You are now logged in. Proceed with your scraping logic here
             //console.log('Logged in. Current URL:', page.url());
-            const notification = await this.statusLogin(page,'div.ant-notification-notice-message');
-            return notification
+            const login:any = [];
+            // Lấy browserWSEndpoint để kết nối lại sau này nếu cần
+            login.browserWSEndpoint = browser.wsEndpoint();
+            login.status = await this.statusLogin(page,'div.home-header-buttons');
+            await browser.disconnect();
+            return login
             //await page.close(); // đóng trang
   }
 
       async statusLogin(page:any,selector:string){
-        await page.waitForSelector(selector);
-         const textSpans = await page.$eval(selector + ' span', el => el.textContent);
-        return textSpans;
+        let loginStatus = false;
+         await page.waitForSelector(selector).then(() => {
+            loginStatus = true;
+          }).catch(e => {
+            loginStatus = false;  
+          });
+          return loginStatus;
       }
+
+    async loadInfoUser(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string){    
+         const browser2 = await puppeteer.connect({ browserWSEndpoint });
+         const page = await browser2.newPage();  // tạo một trang web mới
+         await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL  
+             await page.waitForSelector(selector, { timeout: 1000 });   
+            const rs = await page.$$eval(selector+' td', elements => {
+              // Inside this function, you are in the browser's JavaScript environment
+              return elements.map(el => el.textContent.trim());
+            });
+        await page.close();
+        return rs;        
+    }
+
+    async loadAllInvoice(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string,search:any){    
+         const browser2 = await puppeteer.connect({ browserWSEndpoint });
+         const page = await browser2.newPage();  // tạo một trang web mới
+          await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL  
+          await page.waitForSelector("#tday input");
+          await page.type("#tday input", search.start_date, { delay: 100 });
+          await page.waitForSelector("#dngay input");
+          await page.type("#tday input", search.end_date, { delay: 100 });
+        
+             await page.waitForSelector(selector, { timeout: 1000 });   
+            const rs = await page.$$eval(selector +' td', elements => {
+              // Inside this function, you are in the browser's JavaScript environment
+              return elements.map(el => el.textContent.trim());
+            });
+        await page.close();
+        return rs;        
+    }
       
   async captcha(page:any,selector:string) {
         await page.waitForSelector(selector);
@@ -88,8 +133,8 @@ class Help {
             await page.click(selector + " .ButtonAnt__Button-sc-p5q16s-0");
   }
 
-  async checkInvoice(url:string = "https://hoadondientu.gdt.gov.vn/", obj:any ) {
-         const browser = await launch({ headless: false , defaultViewport: null }); // khởi tạo browser
+  async checkInvoice(url:string = env.get('URL_HOADONDIENTU'), obj:any ) {
+         const browser = await puppeteer.launch({ headless: false , defaultViewport: null }); // khởi tạo browser, full screen
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'domcontentloaded'}); // điều hướng trang web theo URL
             await page.click("button.ant-modal-close");
