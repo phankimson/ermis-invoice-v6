@@ -21,10 +21,17 @@ class Help {
             await this.fillLogin(".home-tabs-login", page, text, username, password);
             // You are now logged in. Proceed with your scraping logic here
             //console.log('Logged in. Current URL:', page.url());
-    
+            const notification = await this.statusLogin(page,'div.ant-notification-notice-message');
+            return notification
             //await page.close(); // đóng trang
   }
-  
+
+      async statusLogin(page:any,selector:string){
+        await page.waitForSelector(selector);
+         const textSpans = await page.$eval(selector + ' span', el => el.textContent);
+        return textSpans;
+      }
+      
   async captcha(page:any,selector:string) {
         await page.waitForSelector(selector);
             const svgUrl = await page.$eval(selector, img => img.src);
