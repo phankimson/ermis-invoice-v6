@@ -5,7 +5,7 @@ import env from '#start/env'
 
 class Help {
   async login(url: string = env.get('URL_HOADONDIENTU'), obj:any) {
-    const browser = await puppeteer.launch({ headless: false , defaultViewport: null}); // khởi tạo browser
+            const browser = await puppeteer.launch({ headless: false , defaultViewport: null}); // khởi tạo browser
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL
             await page.click("button.ant-modal-close");
@@ -162,7 +162,7 @@ class Help {
 
             await this.fillCheckInvoice(".home-tabs-search", page, text, obj);
             const result = await this.loadCheckInvoice(".styles__SearchContentBox-sc-1ljhobs-0", page);
-            //await browser.close();
+            await page.close();
             return result;
   }
 
