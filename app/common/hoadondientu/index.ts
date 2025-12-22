@@ -68,7 +68,7 @@ class Help {
       }
     }
 
-    async loadInfoUser(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string){    
+    async loadInfoUser(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string, page_close = true){    
          const page = await this.reconnect(url,browserWSEndpoint);  //
          await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL  
              await page.waitForSelector(selector, { timeout: 1000 });   
@@ -76,24 +76,64 @@ class Help {
               // Inside this function, you are in the browser's JavaScript environment
               return elements.map(el => el.textContent.trim());
             });
-        await page.close();
+          if(page_close){
+            await page.close();
+          }  
         return rs;        
     }   
 
-    async loadAllInvoice(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string,search:any){    
+    async loadAllInvoice(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string,search:any, page_close = true){    
+          const invoice_group = search.invoice_group || 1;
+          const invoice_type = search.invoice_type || 1;
+          const start_date = await this.convertDate(search.start_date);
+          let end_date = '';
+          if(new Date(search.end_date) < new Date()){
+            end_date = await this.convertDate(search.end_date);
+          }else{
+            const today = new Date();
+            end_date = await today.toLocaleDateString('en-GB'); 
+          }          
           const page = await this.reconnect(url,browserWSEndpoint);  //
-          await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL  
-          await page.waitForSelector("#tday input");
-          await page.type("#tday input", search.start_date, { delay: 100 });
-          await page.waitForSelector("#dngay input");
-          await page.type("#tday input", search.end_date, { delay: 100 });
-        
-             await page.waitForSelector(selector, { timeout: 1000 });   
-            const rs = await page.$$eval(selector +' td', elements => {
-              // Inside this function, you are in the browser's JavaScript environment
-              return elements.map(el => el.textContent.trim());
-            });
-        await page.close();
+          await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL 
+          // Nhóm hóa đơn ( Hóa đơn đầu ra, hóa đơn đầu vào )      
+          await page.waitForSelector('.ant-tabs-nav:first-child');     
+          await page.click('.ant-tabs-nav:first-child .ant-tabs-tab:nth-child('+invoice_group+')');
+          // Loại hóa đơn (Hóa đơn điện tử , hóa đơn khởi tạo tính tiền)
+          await page.waitForSelector('.ant-tabs-tabpane-active', { timeout: 5000 });     
+          await page.click('.ant-tabs-tabpane-active .ant-tabs-tab:nth-child('+invoice_type+')');    
+          //
+          await page.waitForSelector('.ant-tabs-tabpane-active #tngay svg', { timeout: 5000 }); 
+          await page.click('.ant-tabs-tabpane-active #tngay svg');
+          await page.waitForSelector('.ant-tabs-tabpane-active #tngay input', { timeout: 5000 }); 
+          await page.click('.ant-tabs-tabpane-active #tngay input');
+          await page.waitForSelector('.ant-calendar-input ', { timeout: 5000 });  
+          await page.type(".ant-calendar-input ", start_date, { delay: 100 });
+          await page.click('.ant-tabs-tabpane-active .ld-header');
+          // 
+          await page.waitForSelector('.ant-tabs-tabpane-active #dngay svg', { timeout: 5000 }); 
+          await page.click('.ant-tabs-tabpane-active #dngay svg');
+          await page.waitForSelector('.ant-tabs-tabpane-active #dngay input', { timeout: 5000 }); 
+          await page.click('.ant-tabs-tabpane-active #dngay input');
+          await page.waitForSelector('.ant-calendar-input ', { timeout: 5000 });  
+          await page.type(".ant-calendar-input ", end_date, { delay: 100 });
+          await page.click('.ant-tabs-tabpane-active .ld-header');
+          //
+          if(invoice_type == 2 && invoice_group == 2){
+            await page.waitForSelector('.ant-tabs-tabpane-active .ant-select-selection__rendered', { timeout: 5000 }); 
+            await page.click('.ant-tabs-tabpane-active .ant-select-selection__rendered');
+            await page.click('.ant-select-dropdown-menu-item:nth-child(3)'); // Select
+          }
+          await page.waitForSelector('.ant-tabs-tabpane-active button[type="submit"]');
+          await page.click('.ant-tabs-tabpane-active button[type="submit"]');
+           
+          const rs = await page.$$eval(selector +' td', elements => {
+            // Inside this function, you are in the browser's JavaScript environment
+            return elements.map(el => el.textContent.trim());
+          });
+          ;
+        if(page_close){
+            await page.close();
+          }  
         return rs;        
     }
       
@@ -152,7 +192,7 @@ class Help {
             await page.click(selector + " .ButtonAnt__Button-sc-p5q16s-0");
   }
 
-  async checkInvoice(url:string = env.get('URL_HOADONDIENTU'), obj:any ) {
+  async checkInvoice(url:string = env.get('URL_HOADONDIENTU'), obj:any, page_close = true ) {
          const browser = await puppeteer.launch({ headless: false , defaultViewport: null }); // khởi tạo browser, full screen
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'domcontentloaded'}); // điều hướng trang web theo URL
@@ -162,7 +202,9 @@ class Help {
 
             await this.fillCheckInvoice(".home-tabs-search", page, text, obj);
             const result = await this.loadCheckInvoice(".styles__SearchContentBox-sc-1ljhobs-0", page);
-            await page.close();
+            if(page_close){
+             await page.close();
+            }
             return result;
   }
 
@@ -198,6 +240,13 @@ class Help {
           }, selector); // 1. pass variable as an argument   
         return allPText;
   }
+
+    async convertDate(dateString:string){
+      const dateParts = dateString.split('-'); 
+      // The order of elements is preserved
+      const newDateString = dateParts.join('/');
+      return newDateString;
+    }
 }
 export default Help;
     

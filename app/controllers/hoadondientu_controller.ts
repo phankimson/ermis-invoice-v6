@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import * as HDDT from '../common/hoadondientu/index.js';
+import * as HDDT from '../common/hoadondientu/index.js'
 import { Encryption } from '@adonisjs/core/encryption'
 import env from '#start/env'
 
@@ -53,7 +53,7 @@ export default class HoadondientuController {
                 return;
             }
          try {
-        const rs = await help.loadInfoUser(url, browserWSEndpoint, ".ant-table-row");
+        const rs = await help.loadInfoUser(url, browserWSEndpoint, ".ant-table-row",true);
         response.status(200).send(rs);
         return;
         } catch (err) {
@@ -61,7 +61,7 @@ export default class HoadondientuController {
         }
     }
 
-    public async buy_lookup ({ response , session }: HttpContext ) {
+    public async invoice ({ response , session , params }: HttpContext ) {
         const help = new HDDT.default();
         const url = env.get('URL_HOADONDIENTU')+'tra-cuu/tra-cuu-hoa-don';
         const browserWSEndpoint = session.get("browserWSEndpoint");
@@ -70,31 +70,31 @@ export default class HoadondientuController {
             response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin người dùng');
             return;
         }
-    try {
-        const rs = await help.loadInfoUser(url, browserWSEndpoint, ".ant-table-row");
-        response.status(200).send(rs);
+        //try {
+            const rs = await help.loadAllInvoice(url, browserWSEndpoint, ".ant-table-row",params,false);
+            response.status(200).send(rs);
         return;
-        } catch (err) {
-            session.forget("browserWSEndpoint");
-        }
+        //} catch (err) {
+        //    session.forget("browserWSEndpoint");
+        //}
     }
 
 
     public async check_invoice({ response , params }: HttpContext ) {
         const help = new HDDT.default();
         const url = env.get('URL_HOADONDIENTU');
-        const result = await help.checkInvoice(url, params);
+        const result = await help.checkInvoice(url, params, true);
         response.status(200).send(result);
     }
 
-    public async generate_key({ response , params }: HttpContext) {
-      if(params.secret_key != env.get('SECRET_KEY')){
+    public async generate_key({ response , params }: HttpContext) {       
+      if(params.secret_key != env.get('SECRET_KEY').replace(/[^a-zA-Z0-9\s]/g, '!')+'def'){
          response.status(401).send('Mã key không hợp lệ vui lòng liên hệ admin (' + env.get('CONTACT_ADMIN') + ') để được hỗ trợ');
          return;
       }  
-      const encryption = new Encryption({
+       const encryption = new Encryption({
             secret: env.get('SECRET_KEY'), // Replace with your actual secret key
-        })
+        })      
         // Array
         var key = encryption.encrypt([params.username, params.password, params.expiry_start_date, params.expiry_end_date]);
         response.status(200).send(key);
