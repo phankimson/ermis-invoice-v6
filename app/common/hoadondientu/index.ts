@@ -46,19 +46,6 @@ class Help {
           return loginStatus;
       }
 
-    async loadInfoUser(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string){    
-         const browser2 = await puppeteer.connect({ browserWSEndpoint });
-         const page = await browser2.newPage();  // tạo một trang web mới
-         await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL  
-             await page.waitForSelector(selector, { timeout: 1000 });   
-            const rs = await page.$$eval(selector+' td', elements => {
-              // Inside this function, you are in the browser's JavaScript environment
-              return elements.map(el => el.textContent.trim());
-            });
-        await page.close();
-        return rs;        
-    }
-
     async reconnect (url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string){
       const browser = await puppeteer.connect({
         browserWSEndpoint: browserWSEndpoint,
@@ -71,18 +58,30 @@ class Help {
 
       if (page) {
         await page.goto(url, {waitUntil: 'load'});
+        return page;
         //console.log(await page.title());
       } else {
-        const page = await browser.newPage();
-        await page.goto(url, {waitUntil: 'load'});
+        const newPage = await browser.newPage();
+        await newPage.goto(url, {waitUntil: 'load'});
         //console.log(await newPage.title());
+        return newPage;
       }
-      return page;
     }
 
+    async loadInfoUser(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string){    
+         const page = await this.reconnect(url,browserWSEndpoint);  //
+         await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL  
+             await page.waitForSelector(selector, { timeout: 1000 });   
+            const rs = await page.$$eval(selector+' td', elements => {
+              // Inside this function, you are in the browser's JavaScript environment
+              return elements.map(el => el.textContent.trim());
+            });
+        await page.close();
+        return rs;        
+    }   
+
     async loadAllInvoice(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string,search:any){    
-         const browser2 = await puppeteer.connect({ browserWSEndpoint });
-         const page = await browser2.newPage();  // tạo một trang web mới
+          const page = await this.reconnect(url,browserWSEndpoint);  //
           await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL  
           await page.waitForSelector("#tday input");
           await page.type("#tday input", search.start_date, { delay: 100 });
