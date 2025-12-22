@@ -59,6 +59,27 @@ class Help {
         return rs;        
     }
 
+    async reconnect (url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string){
+      const browser = await puppeteer.connect({
+        browserWSEndpoint: browserWSEndpoint,
+        defaultViewport: null // Optional: use the existing browser's viewport
+      });
+
+      // You can now interact with pages in the existing browser
+      const pages = await browser.pages();
+      const page = await pages.find(p => p.url() === url); // Find a specific page by URL
+
+      if (page) {
+        await page.goto(url, {waitUntil: 'load'});
+        //console.log(await page.title());
+      } else {
+        const page = await browser.newPage();
+        await page.goto(url, {waitUntil: 'load'});
+        //console.log(await newPage.title());
+      }
+      return page;
+    }
+
     async loadAllInvoice(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string,search:any){    
          const browser2 = await puppeteer.connect({ browserWSEndpoint });
          const page = await browser2.newPage();  // tạo một trang web mới
