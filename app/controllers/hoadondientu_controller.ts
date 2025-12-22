@@ -15,26 +15,28 @@ export default class HoadondientuController {
             response.status(401).send('Key không hợp lệ vui lòng liên hệ admin (' + env.get('CONTACT_ADMIN') + ') để được hỗ trợ');
             return;
         }
-        const username = key[0];
-        const password = key[1];
+        var obj:any =[];
+        obj.username = key[0];
+        obj.password = key[1];
         const expiry_start_date = key[2];
         const expiry_end_date = key[3];
         if(new Date(expiry_start_date) > new Date() || new Date(expiry_end_date) < new Date()){
             response.status(401).send('Key đã hết hạn sử dụng hoặc chưa đăng ký vui lòng liên hệ admin (' + env.get('CONTACT_ADMIN') + ') để được hỗ trợ');
         }else{     
             // Check nếu đã lưu MST trong session
-            const count_mst = session.has(username)?session.get(username):0;
+            const count_mst = session.has(obj.username)?session.get(obj.username):0;
             if(count_mst >= env.get('COUNT_LOGIN_FAIL')){
                 response.status(400).send("Tài khoản của bạn đã đăng nhập sai quá nhiều lần, vui lòng liên hệ admin (" + env.get('CONTACT_ADMIN') + ") để được hỗ trợ");
                 return;
             }     
-            const result =await help.login(url, username, password);
+            const result =await help.login(url, obj);
             if(result.status == true){
+                 session.forget(obj.username);
                  session.put("browserWSEndpoint", result.browserWSEndpoint);
                  response.status(200).send("Đăng nhập thành công");
                  return;
             }else{
-                 session.put(username, count_mst + 1);
+                 session.put(obj.username, count_mst + 1);
                  response.status(404).send("Đăng nhập không thành công vui lòng kiểm tra lại tài khoản hoặc liên hệ admin (" + env.get('CONTACT_ADMIN') + ") để được hỗ trợ");
                  return;
             }           
@@ -45,7 +47,7 @@ export default class HoadondientuController {
         const help = new HDDT.default();
         const url = env.get('URL_HOADONDIENTU')+'quan-ly-he-thong/quan-ly-nguoi-dung';
         const browserWSEndpoint = session.get("browserWSEndpoint");
-        console.log(browserWSEndpoint);
+        //console.log(browserWSEndpoint);
             if(!browserWSEndpoint){
                 response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin người dùng');
                 return;
@@ -86,6 +88,10 @@ export default class HoadondientuController {
     }
 
     public async generate_key({ response , params }: HttpContext) {
+      if(params.secret_key != env.get('SECRET_KEY')){
+         response.status(401).send('Mã key không hợp lệ vui lòng liên hệ admin (' + env.get('CONTACT_ADMIN') + ') để được hỗ trợ');
+         return;
+      }  
       const encryption = new Encryption({
             secret: env.get('SECRET_KEY'), // Replace with your actual secret key
         })
