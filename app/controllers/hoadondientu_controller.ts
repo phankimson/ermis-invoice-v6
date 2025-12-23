@@ -33,6 +33,7 @@ export default class HoadondientuController {
             if(result.status == true){
                  session.forget(obj.username);
                  session.put("browserWSEndpoint", result.browserWSEndpoint);
+                 session.put("current_url", url);
                  response.status(200).send("Đăng nhập thành công");
                  return;
             }else{
@@ -45,8 +46,9 @@ export default class HoadondientuController {
 
     public async info_user ({ response , session }: HttpContext ) {
         const help = new HDDT.default();
-        //const url = env.get('URL_HOADONDIENTU')+'quan-ly-he-thong/quan-ly-nguoi-dung'; // Sử dụng cho điều hướng trang web hay bị lỗi
-        const url = env.get('URL_HOADONDIENTU');
+        const url = env.get('URL_HOADONDIENTU')+'quan-ly-he-thong/quan-ly-nguoi-dung'; // Sử dụng cho điều hướng trang web
+        const current_url = session.get('current_url');
+        //const url = env.get('URL_HOADONDIENTU');
         const browserWSEndpoint = session.get("browserWSEndpoint");
         //console.log(browserWSEndpoint);
             if(!browserWSEndpoint){
@@ -54,7 +56,8 @@ export default class HoadondientuController {
                 return;
             }
          try {
-        const rs = await help.loadInfoUser(url, browserWSEndpoint, ".ant-table-row",false);
+        const rs = await help.loadInfoUser(url,current_url, browserWSEndpoint, ".ant-table-row",false);
+         session.put("current_url", url);
         response.status(200).send(rs);
         return;
         } catch (err) {
@@ -66,6 +69,7 @@ export default class HoadondientuController {
     public async invoice ({ response , session , params }: HttpContext ) {
         const help = new HDDT.default();
         const url = env.get('URL_HOADONDIENTU')+'tra-cuu/tra-cuu-hoa-don';
+        const current_url = session.get('current_url');
         const browserWSEndpoint = session.get("browserWSEndpoint");
         //console.log(browserWSEndpoint);
         if(!browserWSEndpoint){
@@ -73,7 +77,8 @@ export default class HoadondientuController {
             return;
         }
         try {
-            const rs = await help.loadAllInvoice(url, browserWSEndpoint, ".ant-table-row",params,true);
+            const rs = await help.loadAllInvoice(url,current_url, browserWSEndpoint, " .ant-tabs-tabpane-active .ant-table-row",params,false);
+            session.put("current_url", url);
             response.status(200).send(rs);
         return;
         } catch (err) {
@@ -85,24 +90,26 @@ export default class HoadondientuController {
     public async excel_invoice({ response , session, params  }: HttpContext ) {
         const help = new HDDT.default();
         const url = env.get('URL_HOADONDIENTU')+'tra-cuu/tra-cuu-hoa-don';
+        const current_url = session.get('current_url');
         const browserWSEndpoint = session.get("browserWSEndpoint");
         //console.log(browserWSEndpoint);
-        if(!browserWSEndpoint){
-            response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
-            return;
-        }
-        try {
-            const rs = await help.excelAllInvoice(url, browserWSEndpoint, ".ant-tabs-tabpane-active .ant-row-flex-start .ant-col:nth-child(7)",params,true);
+            if(!browserWSEndpoint){
+                response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
+                return;
+            }
+        //try {
+            const rs = await help.excelAllInvoice(url,current_url, browserWSEndpoint," .ant-row-flex-start .ButtonAnt__IconButton-sc-p5q16s-1",params,false);
             if(rs){
+             session.put("current_url", url);
              response.status(200).send("Xuất excel thành công"); 
             }else{
              response.status(200).send("Xuất excel thất bại");     
             }
         return;
-        } catch (err) {
-            response.status(502).send("Lỗi khi lấy xử lý dữ liệu");   
+        //} catch (err) {
+        //    response.status(502).send("Lỗi khi lấy xử lý dữ liệu");   
             //session.forget("browserWSEndpoint");
-        }
+        //}
     }
 
 

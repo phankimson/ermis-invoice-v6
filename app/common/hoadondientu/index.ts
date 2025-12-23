@@ -31,7 +31,7 @@ class Help {
             // Lấy browserWSEndpoint để kết nối lại sau này nếu cần
             login.browserWSEndpoint = browser.wsEndpoint();
             login.status = await this.statusLogin(page,'div.home-header-buttons');
-            //await browser.disconnect();
+            await browser.disconnect();
             return login
             //await page.close(); // đóng trang
   }
@@ -48,7 +48,8 @@ class Help {
 
     async reconnect (url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string){
       const browser = await puppeteer.connect({
-        browserWSEndpoint: browserWSEndpoint
+        browserWSEndpoint: browserWSEndpoint,
+        defaultViewport: null
       });
 
       // You can now interact with pages in the existing browser
@@ -67,9 +68,11 @@ class Help {
       }
     }
 
-    async loadInfoUser(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string, page_close = true){    
-         const page = await this.reconnect(url,browserWSEndpoint);  //
-             await this.clickMenuInvoice(".flex-space",page,'5','1');
+    async loadInfoUser(url: string = env.get('URL_HOADONDIENTU'), current_url:string , browserWSEndpoint:string ,selector:string, page_close = true){    
+         const page = await this.reconnect(current_url,browserWSEndpoint);  //
+            if(url != current_url){
+              await this.clickMenuInvoice(".flex-space",page,'5','1');
+            }            
              await page.waitForSelector(selector, { timeout: 1000 });   
             const rs = await page.$$eval(selector+' td', elements => {
               // Inside this function, you are in the browser's JavaScript environment
@@ -81,12 +84,20 @@ class Help {
         return rs;        
     }   
 
-    async loadAllInvoice(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string,search:any, page_close = true){      
-          const page = await this.reconnect(url,browserWSEndpoint);  //
-          await this.clickMenuInvoice(".flex-space",page,'7','1');
-          await this.fillSearchInvoice(page,".ant-tabs-tabpane-active",search);
-          await page.waitForSelector(selector, { timeout: 6000 });    
-          const rs = await page.$$eval(selector, elements => {
+    async loadAllInvoice(url: string = env.get('URL_HOADONDIENTU'), current_url:string , browserWSEndpoint:string ,selector:string,search:any, page_close = true){      
+          const page = await this.reconnect(current_url,browserWSEndpoint);  //
+          if(url != current_url){
+            await this.clickMenuInvoice(".flex-space",page,'7','1');
+          }  
+          let ele = "";
+           if(search.invoice_group == 1){
+            ele = ".ant-tabs-tabpane-active:first-child";
+           }else{
+            ele = ".ant-tabs-tabpane-active:nth-child(2)";
+           }         
+          await this.fillSearchInvoice(page,ele,search);
+          await page.waitForSelector(selector, { timeout: 1000 });    
+          const rs = await page.$$eval(ele+selector, elements => {
             // Inside this function, you are in the browser's JavaScript environment
             return elements.map((e) =>
               [...e.querySelectorAll("td")]
@@ -99,17 +110,21 @@ class Help {
         return rs;        
     }
 
-    async excelAllInvoice (url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string,search:any, page_close = true){ 
-        const page = await this.reconnect(url,browserWSEndpoint);  //
-        await this.clickMenuInvoice(".flex-space",page,'7','1');
-        await this.fillSearchInvoice(page,".ant-tabs-tabpane-active",search);
-        let a = await page.evaluate(() => {
-          let el = document.querySelector(selector+' button')
-          return el ? el.innerText : ""
-        })
-        console.log(a);
-        await page.waitForSelector(selector+' button', { timeout: 5000 ,visible : true });
-        await page.click(selector+' button');
+    async excelAllInvoice (url: string = env.get('URL_HOADONDIENTU'), current_url:string , browserWSEndpoint:string ,selector:string,search:any, page_close = true){ 
+        const page = await this.reconnect(current_url,browserWSEndpoint);  //        
+         if(url != current_url){
+            await this.clickMenuInvoice(".flex-space",page,'7','1');
+          } 
+        let ele = "";
+           if(search.invoice_group == 1){
+            ele = ".ant-tabs-tabpane-active:first-child";
+           }else{
+            ele = ".ant-tabs-tabpane-active:nth-child(2)";
+           }         
+         await this.fillSearchInvoice(page,ele,search);
+         await page.waitForSelector(ele+selector,{ visible : true });    
+         await page.click(ele+selector);
+
          if(page_close){
             await page.close();
           }  
@@ -131,27 +146,33 @@ class Help {
           await page.waitForSelector('.ant-tabs-nav:first-child');     
           await page.click('.ant-tabs-nav:first-child .ant-tabs-tab:nth-child('+invoice_group+')');
           // Loại hóa đơn (Hóa đơn điện tử , hóa đơn khởi tạo tính tiền)
-          await page.waitForSelector(selector, { timeout: 5000 });     
+          await page.waitForSelector(selector, { timeout: 1000 });     
           await page.click(selector+' .ant-tabs-tab:nth-child('+invoice_type+')');    
           //
-          await page.waitForSelector(selector+' #tngay svg', { timeout: 5000 }); 
+          await page.waitForSelector(selector+' #tngay svg', { timeout: 1000 }); 
           await page.click(selector+' #tngay svg');
-          await page.waitForSelector(selector+' #tngay input', { timeout: 5000 }); 
+          await page.waitForSelector(selector+' #tngay input', { timeout: 1000 }); 
           await page.click(selector+' #tngay input');
-          await page.waitForSelector('.ant-calendar-input ', { timeout: 5000 });  
+          await page.waitForSelector('.ant-calendar-input ', { timeout: 1000 });  
           await page.type(".ant-calendar-input ", start_date, { delay: 100 });
           await page.click(selector+' .ld-header');
           // 
-          await page.waitForSelector(selector+' #dngay svg', { timeout: 5000 }); 
+          await page.waitForSelector(selector+' #dngay svg', { timeout: 1000 }); 
           await page.click(selector+' #dngay svg');
-          await page.waitForSelector(selector+' #dngay input', { timeout: 5000 }); 
+          await page.waitForSelector(selector+' #dngay input', { timeout: 1000 }); 
           await page.click(selector+' #dngay input');
-          await page.waitForSelector('.ant-calendar-input ', { timeout: 5000 });  
+          await page.waitForSelector('.ant-calendar-input ', { timeout: 1000 });  
+            if(new Date(search.end_date) < new Date()){
+            end_date = await this.convertDate(search.end_date);
+          }else{
+            const today = new Date();
+            end_date = await today.toLocaleDateString('en-GB'); 
+          }  
           await page.type(".ant-calendar-input ", end_date, { delay: 100 });
           await page.click(selector+' .ld-header');
           //
           if(invoice_type == 2 && invoice_group == 2){
-            await page.waitForSelector(selector+' #ttxly', { timeout: 5000 }); 
+            await page.waitForSelector(selector+' #ttxly', { timeout: 1000 }); 
             await page.click(selector+' #ttxly');
             await page.click('.ant-select-dropdown-menu-item:nth-child(3)'); // Select
           }
@@ -264,9 +285,9 @@ class Help {
   }
 
   async clickMenuInvoice(selector:string,page:any,child:string,page_no:string){
-     await page.waitForSelector(selector);
+     await page.waitForSelector(selector, { visible : true });
      await page.click(selector + ' .ml-menu-item:nth-child('+child+')');
-     await page.waitForSelector(selector);
+     await page.waitForSelector('.ant-dropdown-menu-item:nth-child('+page_no+')');
      await page.click('.ant-dropdown-menu-item:nth-child('+page_no+')')
   }
 
