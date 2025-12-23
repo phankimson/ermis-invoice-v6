@@ -31,7 +31,7 @@ class Help {
             // Lấy browserWSEndpoint để kết nối lại sau này nếu cần
             login.browserWSEndpoint = browser.wsEndpoint();
             login.status = await this.statusLogin(page,'div.home-header-buttons');
-            await browser.disconnect();
+            //await browser.disconnect();
             return login
             //await page.close(); // đóng trang
   }
@@ -56,7 +56,7 @@ class Help {
       const page = await pages.find(p => p.url() === url); // Find a specific page by URL
 
       if (page) {
-        await page.goto(url, {waitUntil: 'load'});
+        //await page.goto(url, {waitUntil: 'load'});
         return page;
         //console.log(await page.title());
       } else {
@@ -69,8 +69,7 @@ class Help {
 
     async loadInfoUser(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string, page_close = true){    
          const page = await this.reconnect(url,browserWSEndpoint);  //
-         await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL hay bị lỗi 
-             //await this.clickMenuInvoice(".flex-space",page,'5','1');
+             await this.clickMenuInvoice(".flex-space",page,'5','1');
              await page.waitForSelector(selector, { timeout: 1000 });   
             const rs = await page.$$eval(selector+' td', elements => {
               // Inside this function, you are in the browser's JavaScript environment
@@ -84,7 +83,7 @@ class Help {
 
     async loadAllInvoice(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string,search:any, page_close = true){      
           const page = await this.reconnect(url,browserWSEndpoint);  //
-          await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL 
+          await this.clickMenuInvoice(".flex-space",page,'7','1');
           await this.fillSearchInvoice(page,".ant-tabs-tabpane-active",search);
           await page.waitForSelector(selector, { timeout: 6000 });    
           const rs = await page.$$eval(selector, elements => {
@@ -102,7 +101,7 @@ class Help {
 
     async excelAllInvoice (url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string,search:any, page_close = true){ 
         const page = await this.reconnect(url,browserWSEndpoint);  //
-        await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL 
+        await this.clickMenuInvoice(".flex-space",page,'7','1');
         await this.fillSearchInvoice(page,".ant-tabs-tabpane-active",search);
         let a = await page.evaluate(() => {
           let el = document.querySelector(selector+' button')

@@ -45,8 +45,8 @@ export default class HoadondientuController {
 
     public async info_user ({ response , session }: HttpContext ) {
         const help = new HDDT.default();
-        const url = env.get('URL_HOADONDIENTU')+'quan-ly-he-thong/quan-ly-nguoi-dung'; // Sử dụng cho điều hướng trang web hay bị lỗi
-        //const url = env.get('URL_HOADONDIENTU');
+        //const url = env.get('URL_HOADONDIENTU')+'quan-ly-he-thong/quan-ly-nguoi-dung'; // Sử dụng cho điều hướng trang web hay bị lỗi
+        const url = env.get('URL_HOADONDIENTU');
         const browserWSEndpoint = session.get("browserWSEndpoint");
         //console.log(browserWSEndpoint);
             if(!browserWSEndpoint){
@@ -54,7 +54,7 @@ export default class HoadondientuController {
                 return;
             }
          try {
-        const rs = await help.loadInfoUser(url, browserWSEndpoint, ".ant-table-row",true);
+        const rs = await help.loadInfoUser(url, browserWSEndpoint, ".ant-table-row",false);
         response.status(200).send(rs);
         return;
         } catch (err) {
