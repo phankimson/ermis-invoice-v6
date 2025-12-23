@@ -45,7 +45,8 @@ export default class HoadondientuController {
 
     public async info_user ({ response , session }: HttpContext ) {
         const help = new HDDT.default();
-        const url = env.get('URL_HOADONDIENTU')+'quan-ly-he-thong/quan-ly-nguoi-dung';
+        const url = env.get('URL_HOADONDIENTU')+'quan-ly-he-thong/quan-ly-nguoi-dung'; // Sử dụng cho điều hướng trang web hay bị lỗi
+        //const url = env.get('URL_HOADONDIENTU');
         const browserWSEndpoint = session.get("browserWSEndpoint");
         //console.log(browserWSEndpoint);
             if(!browserWSEndpoint){
@@ -57,7 +58,8 @@ export default class HoadondientuController {
         response.status(200).send(rs);
         return;
         } catch (err) {
-            session.forget("browserWSEndpoint");
+            response.status(502).send("Lỗi khi lấy xử lý dữ liệu");  
+            //session.forget("browserWSEndpoint");
         }
     }
 
@@ -67,16 +69,40 @@ export default class HoadondientuController {
         const browserWSEndpoint = session.get("browserWSEndpoint");
         //console.log(browserWSEndpoint);
         if(!browserWSEndpoint){
-            response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin người dùng');
+            response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
             return;
         }
-        //try {
-            const rs = await help.loadAllInvoice(url, browserWSEndpoint, ".ant-table-row",params,false);
+        try {
+            const rs = await help.loadAllInvoice(url, browserWSEndpoint, ".ant-table-row",params,true);
             response.status(200).send(rs);
         return;
-        //} catch (err) {
-        //    session.forget("browserWSEndpoint");
-        //}
+        } catch (err) {
+            response.status(502).send("Lỗi khi lấy xử lý dữ liệu");  
+            //session.forget("browserWSEndpoint");
+        }
+    }
+
+    public async excel_invoice({ response , session, params  }: HttpContext ) {
+        const help = new HDDT.default();
+        const url = env.get('URL_HOADONDIENTU')+'tra-cuu/tra-cuu-hoa-don';
+        const browserWSEndpoint = session.get("browserWSEndpoint");
+        //console.log(browserWSEndpoint);
+        if(!browserWSEndpoint){
+            response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
+            return;
+        }
+        try {
+            const rs = await help.excelAllInvoice(url, browserWSEndpoint, ".ant-tabs-tabpane-active .ant-row-flex-start .ant-col:nth-child(7)",params,true);
+            if(rs){
+             response.status(200).send("Xuất excel thành công"); 
+            }else{
+             response.status(200).send("Xuất excel thất bại");     
+            }
+        return;
+        } catch (err) {
+            response.status(502).send("Lỗi khi lấy xử lý dữ liệu");   
+            //session.forget("browserWSEndpoint");
+        }
     }
 
 

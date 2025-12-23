@@ -48,8 +48,7 @@ class Help {
 
     async reconnect (url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string){
       const browser = await puppeteer.connect({
-        browserWSEndpoint: browserWSEndpoint,
-        defaultViewport: null // Optional: use the existing browser's viewport
+        browserWSEndpoint: browserWSEndpoint
       });
 
       // You can now interact with pages in the existing browser
@@ -70,7 +69,8 @@ class Help {
 
     async loadInfoUser(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string, page_close = true){    
          const page = await this.reconnect(url,browserWSEndpoint);  //
-         await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL  
+         await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL hay bị lỗi 
+             //await this.clickMenuInvoice(".flex-space",page,'5','1');
              await page.waitForSelector(selector, { timeout: 1000 });   
             const rs = await page.$$eval(selector+' td', elements => {
               // Inside this function, you are in the browser's JavaScript environment
@@ -82,7 +82,42 @@ class Help {
         return rs;        
     }   
 
-    async loadAllInvoice(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string,search:any, page_close = true){    
+    async loadAllInvoice(url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string,search:any, page_close = true){      
+          const page = await this.reconnect(url,browserWSEndpoint);  //
+          await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL 
+          await this.fillSearchInvoice(page,".ant-tabs-tabpane-active",search);
+          await page.waitForSelector(selector, { timeout: 6000 });    
+          const rs = await page.$$eval(selector, elements => {
+            // Inside this function, you are in the browser's JavaScript environment
+            return elements.map((e) =>
+              [...e.querySelectorAll("td")]
+                .map((e) => e.textContent.trim())
+            );
+          });   
+        if(page_close){
+            await page.close();
+          }  
+        return rs;        
+    }
+
+    async excelAllInvoice (url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string ,selector:string,search:any, page_close = true){ 
+        const page = await this.reconnect(url,browserWSEndpoint);  //
+        await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL 
+        await this.fillSearchInvoice(page,".ant-tabs-tabpane-active",search);
+        let a = await page.evaluate(() => {
+          let el = document.querySelector(selector+' button')
+          return el ? el.innerText : ""
+        })
+        console.log(a);
+        await page.waitForSelector(selector+' button', { timeout: 5000 ,visible : true });
+        await page.click(selector+' button');
+         if(page_close){
+            await page.close();
+          }  
+        return true;
+    }
+
+    async fillSearchInvoice(page:any,selector:string,search:any) {
           const invoice_group = search.invoice_group || 1;
           const invoice_type = search.invoice_type || 1;
           const start_date = await this.convertDate(search.start_date);
@@ -93,48 +128,36 @@ class Help {
             const today = new Date();
             end_date = await today.toLocaleDateString('en-GB'); 
           }          
-          const page = await this.reconnect(url,browserWSEndpoint);  //
-          await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL 
           // Nhóm hóa đơn ( Hóa đơn đầu ra, hóa đơn đầu vào )      
           await page.waitForSelector('.ant-tabs-nav:first-child');     
           await page.click('.ant-tabs-nav:first-child .ant-tabs-tab:nth-child('+invoice_group+')');
           // Loại hóa đơn (Hóa đơn điện tử , hóa đơn khởi tạo tính tiền)
-          await page.waitForSelector('.ant-tabs-tabpane-active', { timeout: 5000 });     
-          await page.click('.ant-tabs-tabpane-active .ant-tabs-tab:nth-child('+invoice_type+')');    
+          await page.waitForSelector(selector, { timeout: 5000 });     
+          await page.click(selector+' .ant-tabs-tab:nth-child('+invoice_type+')');    
           //
-          await page.waitForSelector('.ant-tabs-tabpane-active #tngay svg', { timeout: 5000 }); 
-          await page.click('.ant-tabs-tabpane-active #tngay svg');
-          await page.waitForSelector('.ant-tabs-tabpane-active #tngay input', { timeout: 5000 }); 
-          await page.click('.ant-tabs-tabpane-active #tngay input');
+          await page.waitForSelector(selector+' #tngay svg', { timeout: 5000 }); 
+          await page.click(selector+' #tngay svg');
+          await page.waitForSelector(selector+' #tngay input', { timeout: 5000 }); 
+          await page.click(selector+' #tngay input');
           await page.waitForSelector('.ant-calendar-input ', { timeout: 5000 });  
           await page.type(".ant-calendar-input ", start_date, { delay: 100 });
-          await page.click('.ant-tabs-tabpane-active .ld-header');
+          await page.click(selector+' .ld-header');
           // 
-          await page.waitForSelector('.ant-tabs-tabpane-active #dngay svg', { timeout: 5000 }); 
-          await page.click('.ant-tabs-tabpane-active #dngay svg');
-          await page.waitForSelector('.ant-tabs-tabpane-active #dngay input', { timeout: 5000 }); 
-          await page.click('.ant-tabs-tabpane-active #dngay input');
+          await page.waitForSelector(selector+' #dngay svg', { timeout: 5000 }); 
+          await page.click(selector+' #dngay svg');
+          await page.waitForSelector(selector+' #dngay input', { timeout: 5000 }); 
+          await page.click(selector+' #dngay input');
           await page.waitForSelector('.ant-calendar-input ', { timeout: 5000 });  
           await page.type(".ant-calendar-input ", end_date, { delay: 100 });
-          await page.click('.ant-tabs-tabpane-active .ld-header');
+          await page.click(selector+' .ld-header');
           //
           if(invoice_type == 2 && invoice_group == 2){
-            await page.waitForSelector('.ant-tabs-tabpane-active .ant-select-selection__rendered', { timeout: 5000 }); 
-            await page.click('.ant-tabs-tabpane-active .ant-select-selection__rendered');
+            await page.waitForSelector(selector+' #ttxly', { timeout: 5000 }); 
+            await page.click(selector+' #ttxly');
             await page.click('.ant-select-dropdown-menu-item:nth-child(3)'); // Select
           }
-          await page.waitForSelector('.ant-tabs-tabpane-active button[type="submit"]');
-          await page.click('.ant-tabs-tabpane-active button[type="submit"]');
-           
-          const rs = await page.$$eval(selector +' td', elements => {
-            // Inside this function, you are in the browser's JavaScript environment
-            return elements.map(el => el.textContent.trim());
-          });
-          ;
-        if(page_close){
-            await page.close();
-          }  
-        return rs;        
+          await page.waitForSelector(selector+' button[type="submit"]');
+          await page.click(selector+' button[type="submit"]');
     }
       
   async captcha(page:any,selector:string) {
@@ -239,6 +262,13 @@ class Help {
                 return pContents;
           }, selector); // 1. pass variable as an argument   
         return allPText;
+  }
+
+  async clickMenuInvoice(selector:string,page:any,child:string,page_no:string){
+     await page.waitForSelector(selector);
+     await page.click(selector + ' .ml-menu-item:nth-child('+child+')');
+     await page.waitForSelector(selector);
+     await page.click('.ant-dropdown-menu-item:nth-child('+page_no+')')
   }
 
     async convertDate(dateString:string){
