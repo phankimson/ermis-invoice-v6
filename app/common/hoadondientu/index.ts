@@ -2,10 +2,13 @@
 import puppeteer from 'puppeteer';
 import * as cheerio from 'cheerio';
 import env from '#start/env'
+import path from 'path'
+import fs from 'fs'
+import http from 'http';
 
 class Help {
   async login(url: string = env.get('URL_HOADONDIENTU'), obj:any) {
-            const browser = await puppeteer.launch({ headless: false , defaultViewport: null}); // khởi tạo browser
+            const browser = await puppeteer.launch({ headless: env.get('HEADLESS') , defaultViewport: null}); // khởi tạo browser
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL
             await page.click("button.ant-modal-close");
@@ -38,7 +41,7 @@ class Help {
 
       async statusLogin(page:any,selector:string){
         let loginStatus = false;
-         await page.waitForSelector(selector).then(() => {
+         await page.waitForSelector(selector, { timeout: 1000 }).then(() => {
             loginStatus = true;
           }).catch(e => {
             loginStatus = false;  
@@ -46,7 +49,7 @@ class Help {
           return loginStatus;
       }
 
-    async reconnect (url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string){
+    async reconnect (url: string = env.get('URL_HOADONDIENTU'), browserWSEndpoint:string,waitUntil:any = 'load'){
       const browser = await puppeteer.connect({
         browserWSEndpoint: browserWSEndpoint,
         defaultViewport: null
@@ -62,73 +65,130 @@ class Help {
         //console.log(await page.title());
       } else {
         const newPage = await browser.newPage();
-        await newPage.goto(url, {waitUntil: 'load'});
+        await newPage.goto(url, {waitUntil: waitUntil});
         //console.log(await newPage.title());
         return newPage;
       }
     }
 
-    async loadInfoUser(url: string = env.get('URL_HOADONDIENTU'), current_url:string , browserWSEndpoint:string ,selector:string, page_close = true){    
-         const page = await this.reconnect(current_url,browserWSEndpoint);  //
-            if(url != current_url){
+    async loadInfoUser(params:any){    
+          let page:any;
+          if(env.get('PAGE_REDIRECTION') == true){
+            page = await this.reconnect(params.url,params.browserWSEndpoint,'domcontentloaded');  //    
+            params.page_close = true;    
+          }else{
+            page = await this.reconnect(params.current_url,params.browserWSEndpoint,'domcontentloaded');  // 
+            if(params.url != params.current_url){
               await this.clickMenuInvoice(".flex-space",page,'5','1');
-            }            
-             await page.waitForSelector(selector, { timeout: 1000 });   
-            const rs = await page.$$eval(selector+' td', elements => {
+            }    
+          }                         
+             await page.waitForSelector(params.selector, { timeout: 1000 });   
+            const rs = await page.$$eval(params.selector+' td', elements => {
               // Inside this function, you are in the browser's JavaScript environment
               return elements.map(el => el.textContent.trim());
             });
-          if(page_close){
+          if(params.page_close){
             await page.close();
           }  
         return rs;        
     }   
 
-    async loadAllInvoice(url: string = env.get('URL_HOADONDIENTU'), current_url:string , browserWSEndpoint:string ,selector:string,search:any, page_close = true){      
-          const page = await this.reconnect(current_url,browserWSEndpoint);  //
-          if(url != current_url){
-            await this.clickMenuInvoice(".flex-space",page,'7','1');
-          }  
+    async loadAllInvoice(params:any){      
+          let page:any;
+          if(env.get('PAGE_REDIRECTION') == true){
+            page = await this.reconnect(params.url,params.browserWSEndpoint,'load');  //    
+            params.page_close = true;        
+          }else{
+            page = await this.reconnect(params.current_url,params.browserWSEndpoint,'load');  //  
+            if(params.url != params.current_url){
+              await this.clickMenuInvoice(".flex-space",page,'7','1');
+            }  
+          }       
           let ele = "";
-           if(search.invoice_group == 1){
+           if(params.invoice_group == 1){
             ele = ".ant-tabs-tabpane-active:first-child";
            }else{
             ele = ".ant-tabs-tabpane-active:nth-child(2)";
            }         
-          await this.fillSearchInvoice(page,ele,search);
-          await page.waitForSelector(selector, { timeout: 1000 });    
-          const rs = await page.$$eval(ele+selector, elements => {
-            // Inside this function, you are in the browser's JavaScript environment
-            return elements.map((e) =>
-              [...e.querySelectorAll("td")]
-                .map((e) => e.textContent.trim())
-            );
-          });   
-        if(page_close){
+          await this.fillSearchInvoice(page,ele,params);
+          let rs:any;
+          let allTableData = [];
+          let currentPage = 1;
+          
+              await page.waitForSelector(ele+params.selector, { timeout: 2000 }).then( async () => {
+                  rs = await page.$$eval(ele+params.selector, elements => {
+                  // Inside this function, you are in the browser's JavaScript environment
+                  return elements.map(row => {
+                    // For each row, select all cells (td) and get their text content
+                    const cells = Array.from(row.querySelectorAll('td'));
+                    return cells.map(cell => cell.innerText.trim());
+                  });
+                }); 
+              }).catch(async (e)=> {
+                rs = await page.$eval(ele+' .ant-tabs-tabpane-active .ant-table-placeholder div', el => el.innerText);
+              });           
+            allTableData.push(...rs); 
+            // 2. Check for the "Next" button and navigate
+            
+        if(params.page_close){
             await page.close();
           }  
-        return rs;        
+        return allTableData;        
     }
 
-    async excelAllInvoice (url: string = env.get('URL_HOADONDIENTU'), current_url:string , browserWSEndpoint:string ,selector:string,search:any, page_close = true){ 
-        const page = await this.reconnect(current_url,browserWSEndpoint);  //        
-         if(url != current_url){
+    async excelAllInvoice (params:any){ 
+      let page:any;
+        if(env.get('PAGE_REDIRECTION') == true){
+          page = await this.reconnect(params.url,params.browserWSEndpoint,'networkidle0');  //   
+          params.page_close = true;         
+        }else{
+          page = await this.reconnect(params.current_url,params.browserWSEndpoint,'networkidle0');  //  
+          if(params.url != params.current_url){
             await this.clickMenuInvoice(".flex-space",page,'7','1');
           } 
+        }            
         let ele = "";
-           if(search.invoice_group == 1){
+           if(params.invoice_group == 1){
             ele = ".ant-tabs-tabpane-active:first-child";
            }else{
             ele = ".ant-tabs-tabpane-active:nth-child(2)";
            }         
-         await this.fillSearchInvoice(page,ele,search);
-         await page.waitForSelector(ele+selector,{ visible : true });    
-         await page.click(ele+selector);
+         // Define the download directory relative to the current working directory
+         let rs:any = [];         
+         rs.downloadPath = path.join(process.cwd(), params.download);  
 
-         if(page_close){
+         // Tạo thư mục 
+          fs.mkdir(rs.downloadPath, (err) => {
+            //if (err) {
+            //    console.error('Lỗi khi tạo thư mục:', err);
+            // } else {
+            //    console.log('Thư mục đã được tạo thành công!');
+            // }
+          });
+          
+          // --- CRITICAL STEP: Configure the download behavior ---
+          const client = await page.target().createCDPSession()
+          await client.send('Page.setDownloadBehavior', {
+            behavior: 'allow',
+            downloadPath: rs.downloadPath
+          });
+
+         await this.fillSearchInvoice(page,ele,params);
+         //const imageItems = await page.$eval(ele+selector, element => element.innerHTML);
+         //console.log(imageItems);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await page.waitForSelector(ele+params.selector, { timeout: 1000 }).then(async () => {
+            const current_element = await page.$(ele+params.selector);          
+            await current_element.click();    
+            rs.status = true;  
+          }).catch(e => {
+            rs.status = false;  
+          });
+       
+         if(params.page_close){
             await page.close();
           }  
-        return true;
+        return rs;
     }
 
     async fillSearchInvoice(page:any,selector:string,search:any) {
@@ -151,23 +211,21 @@ class Help {
           //
           await page.waitForSelector(selector+' #tngay svg', { timeout: 1000 }); 
           await page.click(selector+' #tngay svg');
+          await new Promise(resolve => setTimeout(resolve, 500));
           await page.waitForSelector(selector+' #tngay input', { timeout: 1000 }); 
           await page.click(selector+' #tngay input');
+          await new Promise(resolve => setTimeout(resolve, 500));
           await page.waitForSelector('.ant-calendar-input ', { timeout: 1000 });  
           await page.type(".ant-calendar-input ", start_date, { delay: 100 });
           await page.click(selector+' .ld-header');
           // 
           await page.waitForSelector(selector+' #dngay svg', { timeout: 1000 }); 
           await page.click(selector+' #dngay svg');
+          await new Promise(resolve => setTimeout(resolve, 500));
           await page.waitForSelector(selector+' #dngay input', { timeout: 1000 }); 
           await page.click(selector+' #dngay input');
+          await new Promise(resolve => setTimeout(resolve, 500));
           await page.waitForSelector('.ant-calendar-input ', { timeout: 1000 });  
-            if(new Date(search.end_date) < new Date()){
-            end_date = await this.convertDate(search.end_date);
-          }else{
-            const today = new Date();
-            end_date = await today.toLocaleDateString('en-GB'); 
-          }  
           await page.type(".ant-calendar-input ", end_date, { delay: 100 });
           await page.click(selector+' .ld-header');
           //
@@ -175,6 +233,10 @@ class Help {
             await page.waitForSelector(selector+' #ttxly', { timeout: 1000 }); 
             await page.click(selector+' #ttxly');
             await page.click('.ant-select-dropdown-menu-item:nth-child(3)'); // Select
+          }else{
+            await page.waitForSelector(selector+' #ttxly', { timeout: 1000 }); 
+            await page.click(selector+' #ttxly');
+            await page.click('.ant-select-dropdown-menu-item:nth-child(1)'); // Select
           }
           await page.waitForSelector(selector+' button[type="submit"]');
           await page.click(selector+' button[type="submit"]');
@@ -236,7 +298,7 @@ class Help {
   }
 
   async checkInvoice(url:string = env.get('URL_HOADONDIENTU'), obj:any, page_close = true ) {
-         const browser = await puppeteer.launch({ headless: false , defaultViewport: null }); // khởi tạo browser, full screen
+         const browser = await puppeteer.launch({ headless: env.get('HEADLESS') , defaultViewport: null }); // khởi tạo browser, full screen
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'domcontentloaded'}); // điều hướng trang web theo URL
             await page.click("button.ant-modal-close");

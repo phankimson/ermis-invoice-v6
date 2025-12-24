@@ -22,7 +22,8 @@ export default await Env.create(new URL('../', import.meta.url), {
   URL_HOADONDIENTU: Env.schema.string({ format: 'url' }),
   COUNT_LOGIN_FAIL: Env.schema.number(),
   MODEL_CAPCHA_HDDT: Env.schema.string(),
-
+  PAGE_REDIRECTION:Env.schema.boolean(),
+  HEADLESS:Env.schema.boolean(),
   /*
   |----------------------------------------------------------
   | Variables for configuring session package

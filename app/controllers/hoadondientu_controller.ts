@@ -2,6 +2,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 import * as HDDT from '../common/hoadondientu/index.js'
 import { Encryption } from '@adonisjs/core/encryption'
 import env from '#start/env'
+//import app from '@adonisjs/core/services/app'
+//import { unlink } from 'fs/promises'
 
 export default class HoadondientuController {
       public async login_invoice({ response , params ,session}: HttpContext) {
@@ -34,6 +36,7 @@ export default class HoadondientuController {
                  session.forget(obj.username);
                  session.put("browserWSEndpoint", result.browserWSEndpoint);
                  session.put("current_url", url);
+                 session.put("mst", obj.username);
                  response.status(200).send("Đăng nhập thành công");
                  return;
             }else{
@@ -46,18 +49,21 @@ export default class HoadondientuController {
 
     public async info_user ({ response , session }: HttpContext ) {
         const help = new HDDT.default();
-        const url = env.get('URL_HOADONDIENTU')+'quan-ly-he-thong/quan-ly-nguoi-dung'; // Sử dụng cho điều hướng trang web
-        const current_url = session.get('current_url');
-        //const url = env.get('URL_HOADONDIENTU');
-        const browserWSEndpoint = session.get("browserWSEndpoint");
+        let params:any = [];
+        params.url = env.get('URL_HOADONDIENTU')+'quan-ly-he-thong/quan-ly-nguoi-dung'; // Sử dụng cho điều hướng trang web
+        params.current_url = session.get('current_url'); // Đường link hiện tại
+        params.browserWSEndpoint = session.get("browserWSEndpoint"); // Session connect lại
+        params.selector = ".ant-table-row";
+        params.page_close = false;
+
         //console.log(browserWSEndpoint);
-            if(!browserWSEndpoint){
+            if(!params.browserWSEndpoint){
                 response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin người dùng');
                 return;
             }
          try {
-        const rs = await help.loadInfoUser(url,current_url, browserWSEndpoint, ".ant-table-row",false);
-         session.put("current_url", url);
+        const rs = await help.loadInfoUser(params);
+        session.put("current_url", params.url);
         response.status(200).send(rs);
         return;
         } catch (err) {
@@ -68,17 +74,19 @@ export default class HoadondientuController {
 
     public async invoice ({ response , session , params }: HttpContext ) {
         const help = new HDDT.default();
-        const url = env.get('URL_HOADONDIENTU')+'tra-cuu/tra-cuu-hoa-don';
-        const current_url = session.get('current_url');
-        const browserWSEndpoint = session.get("browserWSEndpoint");
+        params.url = env.get('URL_HOADONDIENTU')+'tra-cuu/tra-cuu-hoa-don';
+        params.current_url = session.get('current_url');
+        params.browserWSEndpoint = session.get("browserWSEndpoint");
+        params.selector = " .ant-tabs-tabpane-active .ant-table-row";
+        params.page_close = false;
         //console.log(browserWSEndpoint);
-        if(!browserWSEndpoint){
+        if(!params.browserWSEndpoint){
             response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
             return;
         }
         try {
-            const rs = await help.loadAllInvoice(url,current_url, browserWSEndpoint, " .ant-tabs-tabpane-active .ant-table-row",params,false);
-            session.put("current_url", url);
+            const rs = await help.loadAllInvoice(params);
+            session.put("current_url", params.url);
             response.status(200).send(rs);
         return;
         } catch (err) {
@@ -89,27 +97,33 @@ export default class HoadondientuController {
 
     public async excel_invoice({ response , session, params  }: HttpContext ) {
         const help = new HDDT.default();
-        const url = env.get('URL_HOADONDIENTU')+'tra-cuu/tra-cuu-hoa-don';
-        const current_url = session.get('current_url');
-        const browserWSEndpoint = session.get("browserWSEndpoint");
+        params.url = env.get('URL_HOADONDIENTU')+'tra-cuu/tra-cuu-hoa-don';
+        params.current_url = session.get('current_url');
+        params.browserWSEndpoint = session.get("browserWSEndpoint");
+        params.selector = " .ant-row-flex-start #icon_ketxuat";
+        params.page_close = false;
+        params.download = 'downloads/'+session.get("mst");
+        //params.filename = 'DANH SÁCH HÓA ĐƠN.xlsx';
         //console.log(browserWSEndpoint);
-            if(!browserWSEndpoint){
+            if(!params.browserWSEndpoint){
                 response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
                 return;
             }
-        //try {
-            const rs = await help.excelAllInvoice(url,current_url, browserWSEndpoint," .ant-row-flex-start .ButtonAnt__IconButton-sc-p5q16s-1",params,false);
-            if(rs){
-             session.put("current_url", url);
-             response.status(200).send("Xuất excel thành công"); 
+        try {
+            const rs = await help.excelAllInvoice(params);             
+            if(rs.status){    
+            //const filePath = app.makePath(params.download+'/'+params.filename);            
+            //await unlink(filePath);
+            response.status(200).send("Xuất excel thành công");       
+            session.put("current_url", params.url);
             }else{
-             response.status(200).send("Xuất excel thất bại");     
+             response.status(404).send("Xuất excel thất bại");     
             }
         return;
-        //} catch (err) {
-        //    response.status(502).send("Lỗi khi lấy xử lý dữ liệu");   
+        } catch (err) {
+            response.status(502).send("Lỗi khi lấy xử lý dữ liệu");   
             //session.forget("browserWSEndpoint");
-        //}
+        }
     }
 
 
