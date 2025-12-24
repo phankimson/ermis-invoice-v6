@@ -26,8 +26,7 @@ router
         router.get('/invoice/:invoice_group?/:invoice_type?/:start_date/:end_date', [HoadondientuController, 'invoice']).as('invoice.invoice')
        // http://localhost:3333/api/v1/invoice/2/1/01-12-2025/31-12-2025
         router.get('/excel-invoice/:invoice_group?/:invoice_type?/:start_date/:end_date', [HoadondientuController, 'excel_invoice']).as('invoice.excel_invoice')
-       // http://localhost:3333/api/v1/excel-invoice/2/1/01-12-2025/31-12-2025
-       
+       // http://localhost:3333/api/v1/excel-invoice/2/1/01-12-2025/31-12-2025       
         router.get('/info-user', [HoadondientuController, 'info_user']).as('invoice.info_user')    
         
         router.get('/generate-key/:secret_key/:username/:password/:expiry_start_date/:expiry_end_date', [HoadondientuController, 'generate_key']).as('invoice.generate_key')

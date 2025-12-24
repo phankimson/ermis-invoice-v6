@@ -4,7 +4,6 @@ import * as cheerio from 'cheerio';
 import env from '#start/env'
 import path from 'path'
 import fs from 'fs'
-import http from 'http';
 
 class Help {
   async login(url: string = env.get('URL_HOADONDIENTU'), obj:any) {
@@ -73,7 +72,7 @@ class Help {
 
     async loadInfoUser(params:any){    
           let page:any;
-          if(env.get('PAGE_REDIRECTION') == true){
+          if(env.get('PAGE_REDIRECTION') === true){
             page = await this.reconnect(params.url,params.browserWSEndpoint,'domcontentloaded');  //    
             params.page_close = true;    
           }else{
@@ -95,7 +94,7 @@ class Help {
 
     async loadAllInvoice(params:any){      
           let page:any;
-          if(env.get('PAGE_REDIRECTION') == true){
+          if(env.get('PAGE_REDIRECTION') === true){
             page = await this.reconnect(params.url,params.browserWSEndpoint,'load');  //    
             params.page_close = true;        
           }else{
@@ -110,35 +109,45 @@ class Help {
            }else{
             ele = ".ant-tabs-tabpane-active:nth-child(2)";
            }         
-          await this.fillSearchInvoice(page,ele,params);
-          let rs:any;
-          let allTableData = [];
-          let currentPage = 1;
-          
-              await page.waitForSelector(ele+params.selector, { timeout: 2000 }).then( async () => {
-                  rs = await page.$$eval(ele+params.selector, elements => {
-                  // Inside this function, you are in the browser's JavaScript environment
-                  return elements.map(row => {
-                    // For each row, select all cells (td) and get their text content
-                    const cells = Array.from(row.querySelectorAll('td'));
-                    return cells.map(cell => cell.innerText.trim());
-                  });
-                }); 
-              }).catch(async (e)=> {
-                rs = await page.$eval(ele+' .ant-tabs-tabpane-active .ant-table-placeholder div', el => el.innerText);
-              });           
-            allTableData.push(...rs); 
-            // 2. Check for the "Next" button and navigate
-            
+          await this.fillSearchInvoice(page,ele,params);         
+          let rs:any = [];
+          let TableData:any = [];
+          await new Promise(resolve => setTimeout(resolve, 500));
+          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3');
+          const pageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
+          let total = parseInt(String(pageTotal).replace("1 / ", ""));
+          for(let i:number = 1; i <= total ; i++){
+              await page.waitForSelector(ele+params.selector, { timeout: 1000 }).then( async () => {
+                TableData = await page.$$eval(ele+params.selector, elements => {
+                // Inside this function, you are in the browser's JavaScript environment
+                return elements.map(row => {
+                  // For each row, select all cells (td) and get their text content
+                  const cells = Array.from(row.querySelectorAll('td'));
+                  return cells.map(cell => cell.innerText.trim());
+                });
+              }); 
+          rs.push(TableData); 
+            }).catch(async (e)=> {
+              rs = await page.$eval(ele+' .ant-tabs-tabpane-active .ant-table-placeholder div', el => el.innerText);
+            });  
+            if(i <= total){
+              // Click button next 
+              await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)');
+              await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)'); 
+              await new Promise(resolve => setTimeout(resolve, 1000));  
+            }     
+  
+          }                        
+                   
         if(params.page_close){
             await page.close();
           }  
-        return allTableData;        
+        return rs;        
     }
 
     async excelAllInvoice (params:any){ 
       let page:any;
-        if(env.get('PAGE_REDIRECTION') == true){
+        if(env.get('PAGE_REDIRECTION') === true){
           page = await this.reconnect(params.url,params.browserWSEndpoint,'networkidle0');  //   
           params.page_close = true;         
         }else{
@@ -228,18 +237,20 @@ class Help {
           await page.waitForSelector('.ant-calendar-input ', { timeout: 1000 });  
           await page.type(".ant-calendar-input ", end_date, { delay: 100 });
           await page.click(selector+' .ld-header');
-          //
-          if(invoice_type == 2 && invoice_group == 2){
+          //    
+           if(invoice_type == 2 && invoice_group == 2){
             await page.waitForSelector(selector+' #ttxly', { timeout: 1000 }); 
             await page.click(selector+' #ttxly');
             await page.click('.ant-select-dropdown-menu-item:nth-child(3)'); // Select
-          }else{
-            await page.waitForSelector(selector+' #ttxly', { timeout: 1000 }); 
-            await page.click(selector+' #ttxly');
-            await page.click('.ant-select-dropdown-menu-item:nth-child(1)'); // Select
           }
           await page.waitForSelector(selector+' button[type="submit"]');
           await page.click(selector+' button[type="submit"]');
+           if(invoice_type == 2 && invoice_group == 2){
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            await page.waitForSelector(selector+' #ttxly', { timeout: 1000 }); 
+            await page.click(selector+' #ttxly');
+            await page.click('.ant-select-dropdown-menu-item:nth-child(1)'); // Reset
+          }
     }
       
   async captcha(page:any,selector:string) {

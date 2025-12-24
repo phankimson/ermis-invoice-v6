@@ -22,7 +22,7 @@ export default class HoadondientuController {
         obj.password = key[1];
         const expiry_start_date = key[2];
         const expiry_end_date = key[3];
-        if(new Date(expiry_start_date) > new Date() || new Date(expiry_end_date) < new Date()){
+        if(new Date(expiry_start_date) >= new Date() || new Date(expiry_end_date) <= new Date()){
             response.status(401).send('Key đã hết hạn sử dụng hoặc chưa đăng ký vui lòng liên hệ admin (' + env.get('CONTACT_ADMIN') + ') để được hỗ trợ');
         }else{     
             // Check nếu đã lưu MST trong session
@@ -84,15 +84,15 @@ export default class HoadondientuController {
             response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
             return;
         }
-        try {
+        //try {
             const rs = await help.loadAllInvoice(params);
             session.put("current_url", params.url);
             response.status(200).send(rs);
         return;
-        } catch (err) {
-            response.status(502).send("Lỗi khi lấy xử lý dữ liệu");  
+        //} catch (err) {
+        //   response.status(502).send("Lỗi khi lấy xử lý dữ liệu");  
             //session.forget("browserWSEndpoint");
-        }
+        //}
     }
 
     public async excel_invoice({ response , session, params  }: HttpContext ) {
