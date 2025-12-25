@@ -2,7 +2,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 import * as HDDT from '../common/hoadondientu/index.js'
 import { Encryption } from '@adonisjs/core/encryption'
 import env from '#start/env'
-//import app from '@adonisjs/core/services/app'
+import Excel from 'exceljs'
+import app from '@adonisjs/core/services/app'
 //import { unlink } from 'fs/promises'
 
 export default class HoadondientuController {
@@ -64,10 +65,11 @@ export default class HoadondientuController {
          try {
         const rs = await help.loadInfoUser(params);
         session.put("current_url", params.url);
-        response.status(200).send(rs);
+        response.json(rs);
         return;
         } catch (err) {
             response.status(502).send("Lỗi khi lấy xử lý dữ liệu");  
+            return;
             //session.forget("browserWSEndpoint");
         }
     }
@@ -84,15 +86,16 @@ export default class HoadondientuController {
             response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
             return;
         }
-        //try {
+        try {
             const rs = await help.loadAllInvoice(params);
             session.put("current_url", params.url);
-            response.status(200).send(rs);
+            response.json(rs);
         return;
-        //} catch (err) {
-        //   response.status(502).send("Lỗi khi lấy xử lý dữ liệu");  
+        } catch (err) {
+           response.status(502).send("Lỗi khi lấy xử lý dữ liệu"); 
+           return; 
             //session.forget("browserWSEndpoint");
-        //}
+        }
     }
 
     public async excel_invoice({ response , session, params  }: HttpContext ) {
@@ -122,8 +125,44 @@ export default class HoadondientuController {
         return;
         } catch (err) {
             response.status(502).send("Lỗi khi lấy xử lý dữ liệu");   
+            return; 
             //session.forget("browserWSEndpoint");
         }
+    }
+
+    public async e_invoice({ response , session  }: HttpContext ) {
+    if(session.get("mst")){
+        let download = 'downloads/'+session.get("mst");
+        let filename = 'DANH SÁCH HÓA ĐƠN.xlsx';
+            // Tạo một instance ExcelJS
+        const workbook = new Excel.Workbook();
+        // Trong AdonisJS, đường dẫn thường tương đối so với thư mục gốc
+        const absolutePath:any = app.makePath(download+'/'+filename);
+
+        // Đọc file
+        await workbook.xlsx.readFile(absolutePath); // tmpPath là đường dẫn tạm thời của file
+
+        const worksheet:any = workbook.getWorksheet(1); // Lấy sheet đầu tiên
+        const data:any = [];
+
+        // Duyệt qua các hàng (bỏ qua hàng tiêu đề nếu có)
+        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+        if (rowNumber > 6) { // Bỏ qua hàng tiêu đề (hàng 1)
+            const rowData:any = {};
+            row.eachCell((cell, colNumber) => {
+            // Lấy tên cột (nếu có) hoặc dùng số cột
+            const header = worksheet.getCell(6, colNumber).value;
+            rowData[header] = cell.value;
+            });
+            data.push(rowData);
+        }
+        });
+        // `data` bây giờ là một mảng các object (JSON-like)
+        // Bạn có thể trả về JSON trực tiếp
+        return response.json(data);
+    }else{
+        return response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin người dùng');
+     }
     }
 
 

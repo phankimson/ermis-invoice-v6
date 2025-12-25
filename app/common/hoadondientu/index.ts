@@ -111,14 +111,14 @@ class Help {
            }         
           await this.fillSearchInvoice(page,ele,params);         
           let rs:any = [];
-          let TableData:any = [];
+          //let TableData:any = [];
           await new Promise(resolve => setTimeout(resolve, 500));
           await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3');
-          const pageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
-          let total = parseInt(String(pageTotal).replace("1 / ", ""));
-          for(let i:number = 1; i <= total ; i++){
+          //const pageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
+          //let total = parseInt(String(pageTotal).replace("1 / ", ""));
+          //for(let i:number = 1; i <= total ; i++){
               await page.waitForSelector(ele+params.selector, { timeout: 1000 }).then( async () => {
-                TableData = await page.$$eval(ele+params.selector, elements => {
+                rs = await page.$$eval(ele+params.selector, elements => {
                 // Inside this function, you are in the browser's JavaScript environment
                 return elements.map(row => {
                   // For each row, select all cells (td) and get their text content
@@ -126,18 +126,18 @@ class Help {
                   return cells.map(cell => cell.innerText.trim());
                 });
               }); 
-          rs.push(TableData); 
+          //rs.push(TableData); 
             }).catch(async (e)=> {
               rs = await page.$eval(ele+' .ant-tabs-tabpane-active .ant-table-placeholder div', el => el.innerText);
             });  
-            if(i <= total){
+            //if(i <= total){
               // Click button next 
-              await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)');
-              await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)'); 
-              await new Promise(resolve => setTimeout(resolve, 1000));  
-            }     
+              //await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)');
+              //await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)'); 
+              //await new Promise(resolve => setTimeout(resolve, 1000));  
+            //}     
   
-          }                        
+          //}                        
                    
         if(params.page_close){
             await page.close();
@@ -185,8 +185,8 @@ class Help {
          await this.fillSearchInvoice(page,ele,params);
          //const imageItems = await page.$eval(ele+selector, element => element.innerHTML);
          //console.log(imageItems);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          await page.waitForSelector(ele+params.selector, { timeout: 1000 }).then(async () => {
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          await page.waitForSelector(ele+params.selector, { timeout: 3000 }).then(async () => {
             const current_element = await page.$(ele+params.selector);          
             await current_element.click();    
             rs.status = true;  
