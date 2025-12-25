@@ -86,16 +86,16 @@ export default class HoadondientuController {
             response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
             return;
         }
-        try {
+        //try {
             const rs = await help.loadAllInvoice(params);
             session.put("current_url", params.url);
             response.json(rs);
         return;
-        } catch (err) {
-           response.status(502).send("Lỗi khi lấy xử lý dữ liệu"); 
-           return; 
+       // } catch (err) {
+       //    response.status(502).send("Lỗi khi lấy xử lý dữ liệu"); 
+        //   return; 
             //session.forget("browserWSEndpoint");
-        }
+        //}
     }
 
     public async excel_invoice({ response , session, params  }: HttpContext ) {

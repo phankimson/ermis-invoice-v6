@@ -72,7 +72,7 @@ class Help {
 
     async loadInfoUser(params:any){    
           let page:any;
-          if(env.get('PAGE_REDIRECTION') === true){
+          if(env.get('PAGE_REDIRECTION') == true){
             page = await this.reconnect(params.url,params.browserWSEndpoint,'domcontentloaded');  //    
             params.page_close = true;    
           }else{
@@ -94,7 +94,7 @@ class Help {
 
     async loadAllInvoice(params:any){      
           let page:any;
-          if(env.get('PAGE_REDIRECTION') === true){
+          if(env.get('PAGE_REDIRECTION') == true){
             page = await this.reconnect(params.url,params.browserWSEndpoint,'load');  //    
             params.page_close = true;        
           }else{
@@ -109,14 +109,84 @@ class Help {
            }else{
             ele = ".ant-tabs-tabpane-active:nth-child(2)";
            }         
+          await this.fillSearchInvoice(page,ele,params);      
+          page = await this.reconnect(params.url,params.browserWSEndpoint,'load');  //  reconnect
+          let rs:any;
+          let TableData:any;
+          let i:number = 1;
+          let total:number = 0;
+          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { timeout: 1000 });
+          const pageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
+          total = parseInt(String(pageTotal).replace(i+" / ", ""));
+          await new Promise(resolve => setTimeout(resolve, 1000)); 
+          while(i <= total){
+            await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { timeout: 1000 });
+            const Total_current = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
+            total = parseInt(String(Total_current).replace(i+" / ", ""));
+            console.log(total);
+                await page.waitForSelector(ele+params.selector, { timeout: 2000 }).then( async () => {
+                TableData = await page.$$eval(ele+params.selector, elements => {
+                // Inside this function, you are in the browser's JavaScript environment
+                return elements.map(row => {
+                  // For each row, select all cells (td) and get their text content
+                  const cells = Array.from(row.querySelectorAll('td'));
+                  return cells.map(cell => cell.innerText.trim());
+                });
+              }); 
+              rs.push(TableData); 
+                }).catch(async (e)=> {
+                  rs = await page.$eval(ele+' .ant-tabs-tabpane-active .ant-table-placeholder div', el => el.innerText);
+                });  
+
+            if(i < total){
+              // Click button next 
+              await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)', { timeout: 500 });
+              await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)'); 
+              await new Promise(resolve => setTimeout(resolve, 1000));   
+              i++;
+            }else if(i > total){
+              // Click button prev 
+              await page.waitForSelector(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)', { timeout: 500 });
+              await page.click(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)'); 
+              await new Promise(resolve => setTimeout(resolve, 1000));   
+              i--;  
+            }else{
+              break;
+            }     
+  
+          }                        
+                   
+        if(params.page_close){
+            await page.close();
+          }  
+        return rs;        
+    }
+
+
+    async loadPageInvoice(params:any){      
+          let page:any;
+          if(env.get('PAGE_REDIRECTION') == true){
+            page = await this.reconnect(params.url,params.browserWSEndpoint,'load');  //    
+            params.page_close = true;        
+          }else{
+            page = await this.reconnect(params.current_url,params.browserWSEndpoint,'load');  //  
+            await page.reload({ waitUntil: 'load' });
+            if(params.url != params.current_url){
+              await this.clickMenuInvoice(".flex-space",page,'7','1');
+            }  
+          }       
+          let ele = "";
+           if(params.invoice_group == 1){
+            ele = ".ant-tabs-tabpane-active:first-child";
+           }else{
+            ele = ".ant-tabs-tabpane-active:nth-child(2)";
+           }         
           await this.fillSearchInvoice(page,ele,params);         
           let rs:any = [];
-          //let TableData:any = [];
           await new Promise(resolve => setTimeout(resolve, 500));
           await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3');
-          //const pageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
-          //let total = parseInt(String(pageTotal).replace("1 / ", ""));
-          //for(let i:number = 1; i <= total ; i++){
+          const pageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
+          let total = parseInt(String(pageTotal).replace("1 / ", ""));
               await page.waitForSelector(ele+params.selector, { timeout: 1000 }).then( async () => {
                 rs = await page.$$eval(ele+params.selector, elements => {
                 // Inside this function, you are in the browser's JavaScript environment
@@ -126,18 +196,16 @@ class Help {
                   return cells.map(cell => cell.innerText.trim());
                 });
               }); 
-          //rs.push(TableData); 
+          rs.push(rs); 
             }).catch(async (e)=> {
               rs = await page.$eval(ele+' .ant-tabs-tabpane-active .ant-table-placeholder div', el => el.innerText);
             });  
-            //if(i <= total){
+
               // Click button next 
-              //await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)');
-              //await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)'); 
-              //await new Promise(resolve => setTimeout(resolve, 1000));  
-            //}     
-  
-          //}                        
+              await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)');
+              await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)'); 
+              await new Promise(resolve => setTimeout(resolve, 1000));               
+                             
                    
         if(params.page_close){
             await page.close();
@@ -147,7 +215,7 @@ class Help {
 
     async excelAllInvoice (params:any){ 
       let page:any;
-        if(env.get('PAGE_REDIRECTION') === true){
+        if(env.get('PAGE_REDIRECTION') == true){
           page = await this.reconnect(params.url,params.browserWSEndpoint,'networkidle0');  //   
           params.page_close = true;         
         }else{
@@ -185,7 +253,6 @@ class Help {
          await this.fillSearchInvoice(page,ele,params);
          //const imageItems = await page.$eval(ele+selector, element => element.innerHTML);
          //console.log(imageItems);
-          await new Promise(resolve => setTimeout(resolve, 3000));
           await page.waitForSelector(ele+params.selector, { timeout: 3000 }).then(async () => {
             const current_element = await page.$(ele+params.selector);          
             await current_element.click();    
@@ -215,42 +282,47 @@ class Help {
           await page.waitForSelector('.ant-tabs-nav:first-child');     
           await page.click('.ant-tabs-nav:first-child .ant-tabs-tab:nth-child('+invoice_group+')');
           // Loại hóa đơn (Hóa đơn điện tử , hóa đơn khởi tạo tính tiền)
-          await page.waitForSelector(selector, { timeout: 1000 });     
+          await page.waitForSelector(selector, { timeout: 5000 });     
           await page.click(selector+' .ant-tabs-tab:nth-child('+invoice_type+')');    
           //
-          await page.waitForSelector(selector+' #tngay svg', { timeout: 1000 }); 
-          await page.click(selector+' #tngay svg');
-          await new Promise(resolve => setTimeout(resolve, 500));
-          await page.waitForSelector(selector+' #tngay input', { timeout: 1000 }); 
+          await page.waitForSelector(selector+' #tngay svg', { timeout: 5000 }); 
+          await page.click(selector+' #tngay svg');    
+          await page.waitForSelector(selector+' #tngay input', { timeout: 5000 }); 
           await page.click(selector+' #tngay input');
-          await new Promise(resolve => setTimeout(resolve, 500));
-          await page.waitForSelector('.ant-calendar-input ', { timeout: 1000 });  
+          await new Promise(resolve => setTimeout(resolve, 1000));   
+          await page.waitForSelector('.ant-calendar-input ', { timeout: 5000 });  
           await page.type(".ant-calendar-input ", start_date, { delay: 100 });
           await page.click(selector+' .ld-header');
           // 
-          await page.waitForSelector(selector+' #dngay svg', { timeout: 1000 }); 
+          await page.waitForSelector(selector+' #dngay svg', { timeout: 5000 }); 
           await page.click(selector+' #dngay svg');
-          await new Promise(resolve => setTimeout(resolve, 500));
-          await page.waitForSelector(selector+' #dngay input', { timeout: 1000 }); 
+          await page.waitForSelector(selector+' #dngay input', { timeout: 5000 }); 
           await page.click(selector+' #dngay input');
-          await new Promise(resolve => setTimeout(resolve, 500));
-          await page.waitForSelector('.ant-calendar-input ', { timeout: 1000 });  
+          await new Promise(resolve => setTimeout(resolve, 1000)); 
+          await page.waitForSelector('.ant-calendar-input ', { timeout: 5000 });  
           await page.type(".ant-calendar-input ", end_date, { delay: 100 });
-          await page.click(selector+' .ld-header');
-          //    
+          await page.click(selector+' .ld-header');          
+
            if(invoice_type == 2 && invoice_group == 2){
-            await page.waitForSelector(selector+' #ttxly', { timeout: 1000 }); 
+            await page.waitForSelector(selector+' #ttxly', { timeout: 5000 }); 
             await page.click(selector+' #ttxly');
+            await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(3)', { timeout: 5000 }); 
             await page.click('.ant-select-dropdown-menu-item:nth-child(3)'); // Select
           }
           await page.waitForSelector(selector+' button[type="submit"]');
           await page.click(selector+' button[type="submit"]');
            if(invoice_type == 2 && invoice_group == 2){
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            await page.waitForSelector(selector+' #ttxly', { timeout: 1000 }); 
+            await page.waitForSelector(selector+' #ttxly', { timeout: 5000 }); 
             await page.click(selector+' #ttxly');
+            await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(1)', { timeout: 5000 }); 
             await page.click('.ant-select-dropdown-menu-item:nth-child(1)'); // Reset
           }
+          // 
+           await new Promise(resolve => setTimeout(resolve, 5000));      
+           await page.waitForSelector(selector+' .ant-row-flex-start .ant-select-selection--single', { timeout: 2000 }); 
+           await page.click(selector+' .ant-row-flex-start .ant-select-enabled');
+           await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(3)', { timeout: 2000 }); 
+           await page.click(".ant-select-dropdown-menu-item:nth-child(3)")
     }
       
   async captcha(page:any,selector:string) {
