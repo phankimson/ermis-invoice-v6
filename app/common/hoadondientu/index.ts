@@ -326,7 +326,8 @@ class Help {
           let pageCurrent = parseInt(pageTotal[0]);
           //
          let rs:any = [];
-         let itemPage = params.row+((pageCurrent-1)*50);         
+         let itemPage = parseInt(params.row)+((pageCurrent-1)*50);  
+         console.log(itemPage);       
          rs.downloadPath = path.join(process.cwd(), params.download+'/temp/'+itemPage);  
          rs.pdfPath = path.join(process.cwd(), params.download+'/pdf/'+itemPage); 
          rs.xmlPath = path.join(process.cwd(), params.download+'/xml/'+itemPage);   
@@ -354,8 +355,9 @@ class Help {
           try{
              // Get all row handles
            const rows = await page.$$(ele+params.selector);
+             // Scroll the element into view
            await rows[params.row-1].click();
-           const button_click = (await page.$$(ele+params.btn_selector));
+           const button_click = (await page.$$(ele+params.btn_selector));        
            await button_click[1].click();          
            // console.log(rs.downloadPath);   
            
@@ -363,7 +365,6 @@ class Help {
            createReadStream(rs.downloadPath+'/invoice.zip')
           .pipe(unzipper.Extract({ path: rs.downloadPath }))
           .promise()
-          .then()
           .catch();
           await new Promise(resolve => setTimeout(resolve, 2000));
           await fs.rename(rs.downloadPath+'/invoice.xml', rs.xmlPath+'/invoice.xml', function (err) {
@@ -461,7 +462,7 @@ class Help {
             await page.click('.ant-select-dropdown-menu-item:nth-child(1)'); // Reset
           }
           //   
-           await new Promise(resolve => setTimeout(resolve, 1500))
+           await new Promise(resolve => setTimeout(resolve, 2000))
            await page.waitForSelector(selector+' .ant-row-flex-start .ant-select-selection--single',  { visible : true });
            await page.click(selector+' .ant-row-flex-start .ant-select-enabled');
            await new Promise(resolve => setTimeout(resolve, 1000))

@@ -227,7 +227,7 @@ export default class HoadondientuController {
         const help = new HDDT.default();
         const url = env.get('URL_HOADONDIENTU');
         const result = await help.checkInvoice(url, params, true);
-        response.status(200).send(result);
+        response.json(result);
     }
 
     public async generate_key({ response , params }: HttpContext) {       

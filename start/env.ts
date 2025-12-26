@@ -20,6 +20,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   SECRET_KEY: Env.schema.string(),
   CONTACT_ADMIN: Env.schema.string(),
   URL_HOADONDIENTU: Env.schema.string({ format: 'url' }),
+  URL_TRACUUNNT: Env.schema.string({ format: 'url' }),
   COUNT_LOGIN_FAIL: Env.schema.number(),
   MODEL_CAPCHA_HDDT: Env.schema.string(),
   PAGE_REDIRECTION:Env.schema.boolean(),

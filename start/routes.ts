@@ -48,6 +48,24 @@ router
     })
 .prefix('hddt')
 .as('hddt')
+const TracuunttController = () => import('#controllers/tracuunnt_controller')
+router
+  .group(() => {
+    router
+      .group(() => {
+        router
+          .group(() => {
+            router.get('/check-mst/:tax_code',  [TracuunttController, 'check_mst']).as('invoice.check_mst') // final name
+          })
+          .prefix('v1')
+          .as('v1')
+      })
+  .prefix('api')
+  .as('api')
+    })
+.prefix('tcnt')
+.as('tcnt')
+
 const HomeController = () => import('#controllers/home_controller')
 router.get('/', [HomeController, 'index'])
 router.get('/captcha', [HomeController, 'captcha'])

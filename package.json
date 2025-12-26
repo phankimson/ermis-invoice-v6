@@ -58,7 +58,8 @@
     "path": "^0.12.7",
     "puppeteer": "^24.33.0",
     "reflect-metadata": "^0.2.2",
-    "svg-captcha": "^1.4.0"
+    "svg-captcha": "^1.4.0",
+    "tesseract.js": "^7.0.0"
   },
   "hotHook": {
     "boundaries": [
