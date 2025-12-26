@@ -83,7 +83,7 @@ class Help {
               await this.clickMenuInvoice(".flex-space",page,'5','1');
             }    
           }                         
-             await page.waitForSelector(params.selector, { timeout: 1000 });   
+             await page.waitForSelector(params.selector, { visible : true });   
             const rs = await page.$$eval(params.selector+' td', elements => {
               // Inside this function, you are in the browser's JavaScript environment
               return elements.map(el => el.textContent.trim());

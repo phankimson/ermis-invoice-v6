@@ -4,11 +4,10 @@
 
 export default class TracuunntController {
 
-        public async check_mst({ response , params , session }: HttpContext ) {
+        public async check_mst({ response , params  }: HttpContext ) {
         const search = new TCNT.default();
         const url = env.get('URL_TRACUUNNT')+'tcnnt/mstdn.jsp';
-        const result = await search.checkMST(url, params, false);
-        session.put("browserWSEndpoint", result.browserWSEndpoint);
+        const result = await search.checkMST(url, params, true);
         response.json(result);
     }
 

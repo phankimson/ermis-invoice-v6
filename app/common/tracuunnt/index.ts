@@ -30,7 +30,7 @@ class Search {
                     await worker.terminate();
                 }             
                  const result:any = [];
-                  result.data =  await this.loadCheckMST(".ta_border tr:ntn-child(2)", page);
+                  result.data =  await this.loadCheckMST("#resultContainer tr:ntn-child(1)", page);
                  if(page_close){
                  await page.close();
                  }
@@ -51,7 +51,7 @@ class Search {
   }
 
     async loadCheckMST(selector:string,page:any) { 
-         await page.waitForSelector(selector, { timeout: 1000 });   
+         await page.waitForSelector(selector, { visible : true });
             const rs = await page.$$eval(selector+' td', elements => {
               // Inside this function, you are in the browser's JavaScript environment
               return elements.map(el => el.textContent.trim());
