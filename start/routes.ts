@@ -32,7 +32,9 @@ router
             router.get('/e-invoice', [HoadondientuController, 'e_invoice']).as('invoice.e_invoice')
 
             router.get('/excel-invoice/:invoice_group?/:invoice_type?/:start_date/:end_date', [HoadondientuController, 'excel_invoice']).as('invoice.excel_invoice')
-        
+            
+            router.get('/file-invoice/:invoice_group?/:row', [HoadondientuController, 'file_invoice']).as('invoice.file_invoice')   
+
             router.get('/info-user', [HoadondientuController, 'info_user']).as('invoice.info_user')    
             
             router.get('/generate-key/:secret_key/:username/:password/:expiry_start_date/:expiry_end_date', [HoadondientuController, 'generate_key']).as('invoice.generate_key')

@@ -111,16 +111,47 @@ export default class HoadondientuController {
             response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
             return;
         }
-        //try {
+        try {
             const rs = await help.loadPageInvoice(params);
             session.put("current_url", params.url);
             response.json(rs);
         return;
-       // } catch (err) {
+        } catch (err) {
+           response.status(502).send("Lỗi khi lấy xử lý dữ liệu"); 
+           return; 
+            //session.forget("browserWSEndpoint");
+        }
+    }
+
+
+     public async file_invoice ({ response , session , params }: HttpContext ) {
+        const help = new HDDT.default();
+        params.url = env.get('URL_HOADONDIENTU')+'tra-cuu/tra-cuu-hoa-don';
+        params.current_url = session.get('current_url');
+        params.browserWSEndpoint = session.get("browserWSEndpoint");
+        params.selector = " .ant-tabs-tabpane-active .ant-table-row";
+        params.page_close = false;
+        params.btn_selector = " .ant-row-flex-start #icon_ketxuat";
+        params.download = 'downloads/'+session.get("mst");
+        //console.log(browserWSEndpoint);
+        if(!params.browserWSEndpoint){
+            response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
+            return;
+        }
+        //try {
+            const rs = await help.fileInvoice(params);
+             if(rs.status){  
+                response.status(200).send("Tải file thành công");  
+               }else{
+                response.status(404).send("Tải file thất bại");     
+             }
+            session.put("current_url", params.url);
+            return;
+        //} catch (err) {
         //   response.status(502).send("Lỗi khi lấy xử lý dữ liệu"); 
         //   return; 
             //session.forget("browserWSEndpoint");
-       // }
+        //}
     }
 
     public async excel_invoice({ response , session, params  }: HttpContext ) {
@@ -142,11 +173,12 @@ export default class HoadondientuController {
             if(rs.status){    
             //const filePath = app.makePath(params.download+'/'+params.filename);            
             //await unlink(filePath);
-            response.status(200).send("Xuất excel thành công");       
-            session.put("current_url", params.url);
+             response.status(200).send("Xuất excel thành công");      
+        
             }else{
              response.status(404).send("Xuất excel thất bại");     
             }
+        session.put("current_url", params.url);
         return;
         } catch (err) {
             response.status(502).send("Lỗi khi lấy xử lý dữ liệu");   

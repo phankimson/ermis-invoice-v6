@@ -51,6 +51,7 @@
   "dependencies": {
     "@adonisjs/core": "^6.18.0",
     "@adonisjs/session": "^7.7.0",
+    "@types/unzipper": "^0.10.11",
     "cheerio": "^1.1.2",
     "edge.js": "^6.4.0",
     "exceljs": "^4.4.0",
