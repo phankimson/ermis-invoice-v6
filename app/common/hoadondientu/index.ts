@@ -110,20 +110,18 @@ class Help {
             ele = ".ant-tabs-tabpane-active:nth-child(2)";
            }         
           await this.fillSearchInvoice(page,ele,params);      
-          page = await this.reconnect(params.url,params.browserWSEndpoint,'load');  //  reconnect
           let rs:any;
           let TableData:any;
           let i:number = 1;
           let total:number = 0;
-          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { timeout: 1000 });
+          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { visible : true });
           const pageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
           total = parseInt(String(pageTotal).replace(i+" / ", ""));
-          await new Promise(resolve => setTimeout(resolve, 1000)); 
           while(i <= total){
-            await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { timeout: 1000 });
+            await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { visible : true });
             const Total_current = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
             total = parseInt(String(Total_current).replace(i+" / ", ""));
-            console.log(total);
+            //console.log(total);
                 await page.waitForSelector(ele+params.selector, { timeout: 2000 }).then( async () => {
                 TableData = await page.$$eval(ele+params.selector, elements => {
                 // Inside this function, you are in the browser's JavaScript environment
@@ -135,20 +133,22 @@ class Help {
               }); 
               rs.push(TableData); 
                 }).catch(async (e)=> {
-                  rs = await page.$eval(ele+' .ant-tabs-tabpane-active .ant-table-placeholder div', el => el.innerText);
+                  rs = [];
                 });  
 
             if(i < total){
-              // Click button next 
-              await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)', { timeout: 500 });
-              await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)'); 
-              await new Promise(resolve => setTimeout(resolve, 1000));   
+              // Click button next      
+              await new Promise(resolve => setTimeout(resolve, 4000)).then(async() => 
+                 await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)', { visible : true }),
+                 await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)') 
+              );
               i++;
             }else if(i > total){
               // Click button prev 
-              await page.waitForSelector(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)', { timeout: 500 });
-              await page.click(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)'); 
-              await new Promise(resolve => setTimeout(resolve, 1000));   
+              await new Promise(resolve => setTimeout(resolve, 4000)).then(async() => 
+              await page.waitForSelector(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)', { visible : true }),
+              await page.click(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)') 
+              );
               i--;  
             }else{
               break;
@@ -165,51 +165,82 @@ class Help {
 
     async loadPageInvoice(params:any){      
           let page:any;
+          let page_invoice = (!params.page_invoice || params.page_invoice == 0) ?1:params.page_invoice;   
+          //console.log(page_invoice);     
           if(env.get('PAGE_REDIRECTION') == true){
             page = await this.reconnect(params.url,params.browserWSEndpoint,'load');  //    
             params.page_close = true;        
           }else{
             page = await this.reconnect(params.current_url,params.browserWSEndpoint,'load');  //  
-            await page.reload({ waitUntil: 'load' });
             if(params.url != params.current_url){
               await this.clickMenuInvoice(".flex-space",page,'7','1');
             }  
-          }       
+          }      
+ 
           let ele = "";
            if(params.invoice_group == 1){
             ele = ".ant-tabs-tabpane-active:first-child";
            }else{
             ele = ".ant-tabs-tabpane-active:nth-child(2)";
-           }         
-          await this.fillSearchInvoice(page,ele,params);         
-          let rs:any = [];
-          await new Promise(resolve => setTimeout(resolve, 500));
-          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3');
-          const pageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
-          let total = parseInt(String(pageTotal).replace("1 / ", ""));
-              await page.waitForSelector(ele+params.selector, { timeout: 1000 }).then( async () => {
-                rs = await page.$$eval(ele+params.selector, elements => {
-                // Inside this function, you are in the browser's JavaScript environment
-                return elements.map(row => {
-                  // For each row, select all cells (td) and get their text content
-                  const cells = Array.from(row.querySelectorAll('td'));
-                  return cells.map(cell => cell.innerText.trim());
-                });
-              }); 
-          rs.push(rs); 
-            }).catch(async (e)=> {
-              rs = await page.$eval(ele+' .ant-tabs-tabpane-active .ant-table-placeholder div', el => el.innerText);
-            });  
+           }    
+          let rs:any = [];  
+          await this.changeInvoiceGroup(page,ele,params);         
+          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { visible : true });
+          const textpageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
+          let pageTotal = String(textpageTotal).split("/");
+          let pageCurrent = parseInt(pageTotal[0]);
+          let total = parseInt(pageTotal[1]);
+          //console.log(total);
+          //console.log(pageCurrent);
+          if(page_invoice == total && total == 1){
+              await this.fillSearchInvoice(page,ele,params); 
+          }   
+            if(page_invoice<=total){
+              while(pageCurrent <= page_invoice || pageCurrent > page_invoice){                             
+              await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { visible : true });
+              const textrspageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
+              pageTotal = String(textrspageTotal).split("/");
+              pageCurrent = parseInt(pageTotal[0]);
+              total = parseInt(pageTotal[1]);
+               if(pageCurrent < page_invoice){
+              // Click button next      
+                 await new Promise(resolve => setTimeout(resolve, 4000)).then(async() => 
+                 await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)', { visible : true }),
+                 await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)') 
+              );
+              pageCurrent++;
+              }else if(pageCurrent > page_invoice || pageCurrent > total ){
+                // Click button prev 
+                await new Promise(resolve => setTimeout(resolve, 4000)).then(async() => 
+                await page.waitForSelector(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)', { visible : true }),
+                await page.click(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)') 
+                );
+                pageCurrent--;  
+              }else{
 
-              // Click button next 
-              await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)');
-              await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)'); 
-              await new Promise(resolve => setTimeout(resolve, 1000));               
-                             
-                   
+              }   
+              await page.waitForSelector(ele+params.selector, { timeout: 2000 }).then( async () => {
+                rs = await page.$$eval(ele+params.selector, elements => {
+                    // Inside this function, you are in the browser's JavaScript environment
+                    return elements.map(row => {
+                      // For each row, select all cells (td) and get their text content
+                      const cells = Array.from(row.querySelectorAll('td'));
+                      return cells.map(cell => cell.innerText.trim());
+                    });
+                  }); 
+                }).catch(async (e)=> {
+                  rs = [];
+                });  
+                if(pageCurrent == page_invoice){
+                  break;
+                }
+             }                                 
+
         if(params.page_close){
             await page.close();
-          }  
+          }
+       }       
+               
         return rs;        
     }
 
@@ -267,6 +298,22 @@ class Help {
         return rs;
     }
 
+    async downLoadFile(){
+      
+    }
+
+    async changeInvoiceGroup(page:any,selector:string,search:any){
+          const invoice_group = search.invoice_group || 1;
+          const invoice_type = search.invoice_type || 1;
+            // Nhóm hóa đơn ( Hóa đơn đầu ra, hóa đơn đầu vào )      
+          await page.waitForSelector('.ant-tabs-nav:first-child');     
+          await page.click('.ant-tabs-nav:first-child .ant-tabs-tab:nth-child('+invoice_group+')');
+          // Loại hóa đơn (Hóa đơn điện tử , hóa đơn khởi tạo tính tiền)
+          await page.waitForSelector(selector, { visible : true });     
+          await page.click(selector+' .ant-tabs-tab:nth-child('+invoice_type+')');    
+          //
+    }
+
     async fillSearchInvoice(page:any,selector:string,search:any) {
           const invoice_group = search.invoice_group || 1;
           const invoice_type = search.invoice_type || 1;
@@ -282,47 +329,46 @@ class Help {
           await page.waitForSelector('.ant-tabs-nav:first-child');     
           await page.click('.ant-tabs-nav:first-child .ant-tabs-tab:nth-child('+invoice_group+')');
           // Loại hóa đơn (Hóa đơn điện tử , hóa đơn khởi tạo tính tiền)
-          await page.waitForSelector(selector, { timeout: 5000 });     
+          await page.waitForSelector(selector, { visible : true });     
           await page.click(selector+' .ant-tabs-tab:nth-child('+invoice_type+')');    
           //
-          await page.waitForSelector(selector+' #tngay svg', { timeout: 5000 }); 
+          await page.waitForSelector(selector+' #tngay svg',  { visible : true }); 
           await page.click(selector+' #tngay svg');    
-          await page.waitForSelector(selector+' #tngay input', { timeout: 5000 }); 
+          await page.waitForSelector(selector+' #tngay input',  { visible : true }); 
           await page.click(selector+' #tngay input');
-          await new Promise(resolve => setTimeout(resolve, 1000));   
-          await page.waitForSelector('.ant-calendar-input ', { timeout: 5000 });  
+          await page.waitForSelector('.ant-calendar-input ',  { visible : true });  
           await page.type(".ant-calendar-input ", start_date, { delay: 100 });
           await page.click(selector+' .ld-header');
           // 
-          await page.waitForSelector(selector+' #dngay svg', { timeout: 5000 }); 
+          await page.waitForSelector(selector+' #dngay svg',  { visible : true }); 
           await page.click(selector+' #dngay svg');
-          await page.waitForSelector(selector+' #dngay input', { timeout: 5000 }); 
+          await page.waitForSelector(selector+' #dngay input',  { visible : true }); 
           await page.click(selector+' #dngay input');
-          await new Promise(resolve => setTimeout(resolve, 1000)); 
-          await page.waitForSelector('.ant-calendar-input ', { timeout: 5000 });  
+          await page.waitForSelector('.ant-calendar-input ',  { visible : true });  
           await page.type(".ant-calendar-input ", end_date, { delay: 100 });
           await page.click(selector+' .ld-header');          
 
            if(invoice_type == 2 && invoice_group == 2){
-            await page.waitForSelector(selector+' #ttxly', { timeout: 5000 }); 
+            await page.waitForSelector(selector+' #ttxly',  { visible : true }); 
             await page.click(selector+' #ttxly');
-            await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(3)', { timeout: 5000 }); 
+            await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(3)',  { visible : true }); 
             await page.click('.ant-select-dropdown-menu-item:nth-child(3)'); // Select
           }
-          await page.waitForSelector(selector+' button[type="submit"]');
+          await page.waitForSelector(selector+' button[type="submit"]',{ visible : true });
           await page.click(selector+' button[type="submit"]');
            if(invoice_type == 2 && invoice_group == 2){
-            await page.waitForSelector(selector+' #ttxly', { timeout: 5000 }); 
+            await page.waitForSelector(selector+' #ttxly',  { visible : true }); 
             await page.click(selector+' #ttxly');
-            await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(1)', { timeout: 5000 }); 
+            await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(1)',  { visible : true }); 
             await page.click('.ant-select-dropdown-menu-item:nth-child(1)'); // Reset
           }
-          // 
-           await new Promise(resolve => setTimeout(resolve, 5000));      
-           await page.waitForSelector(selector+' .ant-row-flex-start .ant-select-selection--single', { timeout: 2000 }); 
+          //   
+           await new Promise(resolve => setTimeout(resolve, 3000))
+           await page.waitForSelector(selector+' .ant-row-flex-start .ant-select-selection--single',  { visible : true });
            await page.click(selector+' .ant-row-flex-start .ant-select-enabled');
-           await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(3)', { timeout: 2000 }); 
-           await page.click(".ant-select-dropdown-menu-item:nth-child(3)")
+           await new Promise(resolve => setTimeout(resolve, 3000))
+           await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(3)',  { visible : true });
+           await page.click(".ant-select-dropdown-menu-item:nth-child(3)");
     }
       
   async captcha(page:any,selector:string) {
@@ -370,11 +416,11 @@ class Help {
 
   async fillLogin(selector:string, page:any, text:string , username:string, password:string) {
               // Type the credentials into the form fields
-            await page.waitForSelector(selector + " #username");
+            await page.waitForSelector(selector + " #username",{ visible : true });
             await page.type(selector + " #username", username, { delay: 100 }); // Replace '#username' with the actual selector for the username/email input field
-            await page.waitForSelector(selector + " #password");
+            await page.waitForSelector(selector + " #password",{ visible : true });
             await page.type(selector + " #password", password, { delay: 100 }); // Replace '#password' with the actual selector for the password input field
-            await page.waitForSelector(selector + " #cvalue");
+            await page.waitForSelector(selector + " #cvalue",{ visible : true });
             await page.type(selector + " #cvalue", text, { delay: 100 });
             // Click the "Sign In" button to complete the login process.
             await page.click(selector + " .ButtonAnt__Button-sc-p5q16s-0");
@@ -398,19 +444,19 @@ class Help {
 
   async fillCheckInvoice(selector:string, page:any, text:string , obj: any ) {
               // Type the credentials into the form fields
-            await page.waitForSelector(selector + " #nbmst");
+            await page.waitForSelector(selector + " #nbmst",{ visible : true });
             await page.type(selector + " #nbmst", obj.tax_code, { delay: 100 }); // Replace tax code with the actual selector for the username/email input field
             await page.click(selector + ' .ant-select-selection__rendered');
             await page.click('.ant-select-dropdown-menu-item:nth-child('+obj.invoice_type+')'); // Select invoice type
-            await page.waitForSelector(selector + " #khhdon");
+            await page.waitForSelector(selector + " #khhdon",{ visible : true });
             await page.type(selector + " #khhdon", obj.invoice_code, { delay: 100 }); // Replace invoice code with the actual selector for the password input field
-            await page.waitForSelector(selector + " #shdon");
+            await page.waitForSelector(selector + " #shdon",{ visible : true });
             await page.type(selector + " #shdon", obj.invoice_no, { delay: 100 }); // Replace invoice no with the actual selector for the password input field
-            await page.waitForSelector(selector + " #tgtthue");
+            await page.waitForSelector(selector + " #tgtthue",{ visible : true });
             await page.type(selector + " #tgtthue", obj.tax_amount.toString(), { delay: 100 }); // Replace tax amount with the actual selector for the password input field
-            await page.waitForSelector(selector + " #tgtttbso");
+            await page.waitForSelector(selector + " #tgtttbso",{ visible : true });
             await page.type(selector + " #tgtttbso", obj.amount.toString(), { delay: 100 }); // Replace amount with the actual selector for the password input field
-            await page.waitForSelector(selector + " #cvalue");
+            await page.waitForSelector(selector + " #cvalue",{ visible : true });
             await page.type(selector + " #cvalue", text, { delay: 100 });
             // Click the "Sign In" button to complete the login process.
             await page.click(selector + " .ButtonAnt__Button-sc-p5q16s-0");

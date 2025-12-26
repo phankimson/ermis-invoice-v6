@@ -5,6 +5,7 @@ tmp
 downloads
 
 # Secrets
+router.txt
 .env
 .env.local
 .env.production.local

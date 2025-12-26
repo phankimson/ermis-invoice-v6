@@ -86,16 +86,41 @@ export default class HoadondientuController {
             response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
             return;
         }
-        //try {
+        try {
             const rs = await help.loadAllInvoice(params);
             session.put("current_url", params.url);
             response.json(rs);
         return;
+        } catch (err) {
+           response.status(502).send("Lỗi khi lấy xử lý dữ liệu"); 
+           return; 
+            //session.forget("browserWSEndpoint");
+        }
+    }
+
+
+    public async p_invoice ({ response , session , params }: HttpContext ) {
+        const help = new HDDT.default();
+        params.url = env.get('URL_HOADONDIENTU')+'tra-cuu/tra-cuu-hoa-don';
+        params.current_url = session.get('current_url');
+        params.browserWSEndpoint = session.get("browserWSEndpoint");
+        params.selector = " .ant-tabs-tabpane-active .ant-table-row";
+        params.page_close = false;
+        //console.log(browserWSEndpoint);
+        if(!params.browserWSEndpoint){
+            response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
+            return;
+        }
+        //try {
+            const rs = await help.loadPageInvoice(params);
+            session.put("current_url", params.url);
+            response.json(rs);
+        return;
        // } catch (err) {
-       //    response.status(502).send("Lỗi khi lấy xử lý dữ liệu"); 
+        //   response.status(502).send("Lỗi khi lấy xử lý dữ liệu"); 
         //   return; 
             //session.forget("browserWSEndpoint");
-        //}
+       // }
     }
 
     public async excel_invoice({ response , session, params  }: HttpContext ) {
