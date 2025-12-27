@@ -88,7 +88,7 @@ const HoadondientuController = () => import('#controllers/hoadondientu_controlle
 router
   .group(() => {
     router.get('/', [HoadondientuController, 'index']).as('/')
-    router.get('/index', [HoadondientuController, 'index']).as('index')
+    router.get('/index', [HoadondientuController, 'index']).as('index').middleware(['checkSessionCustom'])
     router.get('/login-key', [HoadondientuController, 'login_key']).as('login_key')
     })
 .prefix('hoadondientu')

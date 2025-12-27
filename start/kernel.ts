@@ -28,7 +28,7 @@ server.use([() => import('@adonisjs/static/static_middleware'), () => import('@a
  * The router middleware stack runs middleware on all the HTTP
  * requests with a registered route.
  */
-router.use([() => import('@adonisjs/core/bodyparser_middleware'), () => import('@adonisjs/session/session_middleware')])
+router.use([() => import('@adonisjs/core/bodyparser_middleware'), () => import('@adonisjs/session/session_middleware'), () => import('#middleware/secret_key_middleware')])
 
 /**
  * Named middleware collection must be explicitly assigned to

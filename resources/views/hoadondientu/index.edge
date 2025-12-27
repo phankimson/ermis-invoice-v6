@@ -24,7 +24,7 @@
 
     <!-- altair admin -->
     <link rel="stylesheet" href="{{ asset('assets/css/main.min.css') }}" media="all">
-
+    <link rel="stylesheet" href="{{ asset('addon/css/add_index.css') }}" media="all">
 
     <!-- matchMedia polyfill for testing media queries in JS -->
     <!--[if lte IE 9]>
@@ -39,7 +39,7 @@
         <div class="header_main_content">
             <nav class="uk-navbar">
                     <div class="main_logo_top">
-                        <a href="/hoadondientu/"><img src="{{ asset('addon/img/logo-big-blue.png') }}" alt="" height="15" width="71"/></a>
+                        <a href="/hoadondientu/"><img src="{{ asset('addon/img/logo-small-white.png') }}" alt="" height="15" width="71"/></a>
                     </div>
                                 
                 <!-- secondary sidebar switch -->
@@ -82,20 +82,23 @@
         <div class="md-card md-card-primary">
             <div class="md-card-content">
                 <div class="uk-grid" data-uk-grid-margin>
-                <div class="uk-grid uk-width-1-1">
-                <table>
-                <tr></tr>
-                <tr></tr>
-                </table>
-                <div class="uk-width-medium-1-3">
+                <div class="uk-grid uk-width-1-1" align = "center">
+                <div class="uk-width-1-1">
                         <label for="start_date" class="uk-form-label">Từ ngày : </label>
                         <input id="start_date" value="15/12/2025" />
                         <label for="end_date" class="uk-form-label">Đến ngày : </label>
                         <input id="end_date" value="15/12/2025" />
+                        <div class="margin-top-bottom">
+                        <label for="invoice_type" class="uk-form-label">Loại hóa đơn : </label>
+                        <select class="droplist width-300" id="invoice_type">
+                        </div>
+                        <option value="1">Hóa đơn điện tử</option>
+                        <option value="2">Hóa đơn khởi tạo từ máy tính tiền</option>
+                         </select>
                 </div>                  
 
                 </div>
-                    <div class="uk-width-1-1">
+                    <div class="uk-width-1-1 margin-top-bottom"  align = "center">
                     <a class="md-btn md-btn-primary" id="load_invoice" href="javascript:;">Truy vấn</a>
                     <a class="md-btn md-btn-success" id="download_excel" href="javascript:;">Tải bảng kê Excel</a>
                     <div class="uk-button-dropdown" data-uk-dropdown="{pos:'bottom-center'}">
@@ -127,7 +130,7 @@
                         <ul class="uk-tab" data-uk-tab="{connect:'#card_tabs',animation:'slide-horizontal'}">
                             <li><a href="javascript:;">Hóa đơn đầu ra</a></li>
                             <li class="uk-active"><a href="javascript:;">Hóa đơn đầu vào</a></li>
-                        <li class="uk-tab-responsive uk-active uk-hidden" aria-haspopup="true" aria-expanded="false"><a>Active</a><div class="uk-dropdown uk-dropdown-small"><ul class="uk-nav uk-nav-dropdown"></ul><div></div></div></li></ul>
+                        </ul>
                         <ul id="card_tabs" class="uk-switcher uk-margin">
                             <li>
                             <div id="grid1"></div>

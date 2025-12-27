@@ -9,13 +9,13 @@ var ErmisTemplateAjaxPost0 = function(e, postdata, url, callback_true, callback_
 };
 
 var ErmisTemplateAjaxPostApi0 = function(e, url, callback_true, callback_false) {
-    RequestURLWaitingApi(url, 'json', function(result) {
-        if (result.status == 200) {
+    RequestURLWaitingApi(url, function(result) {
             callback_true(result);
-        } else {
+        },
+        function(result){
             callback_false(result);
         }
-    }, true);
+    , true);
 };
 
 var ErmisTemplateAjaxGet0 = function(e, postdata, url, callback_true, callback_false) {
@@ -29,13 +29,13 @@ var ErmisTemplateAjaxGet0 = function(e, postdata, url, callback_true, callback_f
 };
 
 var ErmisTemplateAjaxGetApi0 = function(e, url, callback_true, callback_false) {
-    RequestURLWaitingGetApi(url, 'json', function(result) {
-        if (result.status == 200) {
+    RequestURLWaitingGetApi(url, function(result) {
             callback_true(result);
-        } else {
+        },
+        function(result){
             callback_false(result);
         }
-    }, true);
+    , true);
 };
 
 var ErmisTemplateAjaxPost1 = function(e, elem, url, callback_true, callback_false) {
@@ -71,6 +71,14 @@ var ErmisTemplateAjaxGet1 = function(e, elem, url, callback_true, callback_false
 var ErmisKendoDatePickerTemplate = function(elem, format) {
     jQuery(elem).kendoDatePicker({
         format: format
+    });
+};
+
+
+var ErmisKendoDroplistTemplate = function(elem, filter) {
+    jQuery(elem).kendoDropDownList({
+        filter: filter,
+        autoBind: false,
     });
 };
 

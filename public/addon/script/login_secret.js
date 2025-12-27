@@ -13,16 +13,10 @@ Ermis_login_secret = {
             var url = UrlString("hddt/api/v1/login-invoice/"+secret_key);
             ErmisTemplateAjaxPostApi0(e,url,
                 function(){
-                if(Ermis_login_secret.url_back.indexOf("login_key")>0)
-                {
                     window.location.href = 'index';
-                }else{
-                    window.location.href = Ermis_login_secret.url_back;
-                }
-
                 },
                 function(result){
-                    jQuery('#notification').EPosMessage('error', result.message);
+                    jQuery('#notification').EPosMessage('error', result);
                 }
             );
         };

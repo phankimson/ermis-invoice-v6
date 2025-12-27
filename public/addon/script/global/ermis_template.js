@@ -11,7 +11,7 @@ function RequestURLWaitingGet(url, returnType , postData, callback, displayLoadi
         success: function (result) {
             callback(result);
             if (displayLoading) {
-                kendo.ui.progress(windowWidget, true);
+                kendo.ui.progress(windowWidget, false);
             }
         },
         error: function (xhr) {
@@ -35,7 +35,7 @@ function RequestURLWaiting(url, returnType, postData, callback, displayLoading) 
         success: function (result) {
             callback(result);
             if (displayLoading) {
-                kendo.ui.progress(windowWidget, true);
+                kendo.ui.progress(windowWidget, false);
             }
         },
         error: function (xhr) {
@@ -46,7 +46,7 @@ function RequestURLWaiting(url, returnType, postData, callback, displayLoading) 
     });
 }
 
-function RequestURLWaitingGetApi(url, returnType , callback, displayLoading) {
+function RequestURLWaitingGetApi(url, callback_true,callback_false, displayLoading) {
     var windowWidget = jQuery('body');
     if (displayLoading) {
         kendo.ui.progress(windowWidget, true);
@@ -54,23 +54,20 @@ function RequestURLWaitingGetApi(url, returnType , callback, displayLoading) {
     jQuery.ajax({
         url: url,
         type : 'GET',
-        dataType: returnType,
-        success: function (result) {
-            callback(result);
+    }).done(function(result) {
+             callback_true(result);
             if (displayLoading) {
-                kendo.ui.progress(windowWidget, true);
+                kendo.ui.progress(windowWidget, false);
             }
-        },
-        error: function (xhr) {         
-            kendo.alert(xhr.responseText);
+        })
+        .fail(function(xhr, textStatus) {
+            callback_false(xhr.responseText);
             kendo.ui.progress(windowWidget, false);
-        //    location.reload();
-        }
-    });
+        });;
 }
 
 
-function RequestURLWaitingApi(url, returnType, callback, displayLoading) {
+function RequestURLWaitingApi(url, callback_true,callback_false, displayLoading) {
     var windowWidget = jQuery('body');
     if (displayLoading) {
         kendo.ui.progress(windowWidget, true);
@@ -78,17 +75,14 @@ function RequestURLWaitingApi(url, returnType, callback, displayLoading) {
     jQuery.ajax({
         url: url,
         type : 'POST',
-        dataType: returnType,
-        success: function (result) {
-            callback(result);
+        }).done(function(result) {
+             callback_true(result);
             if (displayLoading) {
-                kendo.ui.progress(windowWidget, true);
+                kendo.ui.progress(windowWidget, false);
             }
-        },
-        error: function (xhr) {
-            kendo.alert(xhr.responseText);
+        })
+        .fail(function(xhr, textStatus) {
+            callback_false(xhr.responseText);
             kendo.ui.progress(windowWidget, false);
-        //    location.reload();
-        }
-    });
+        });
 }
