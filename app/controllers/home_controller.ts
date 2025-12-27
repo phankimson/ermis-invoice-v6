@@ -4,10 +4,15 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 
 export default class HomeController {
-    public async index({ view }: HttpContext) {
+
+    public async index({ response }: HttpContext) {
+         response.redirect().toRoute('hoadondientu./')
+    }    
+
+    public async test({ view }: HttpContext) {
          return view.render('welcome')
-    }
-    
+    }    
+
     public async captcha({ request, response, session }: HttpContext) {
         const captcha = svgCaptcha.create({
                 size: 6, // Độ dài chuỗi 4 ký tự

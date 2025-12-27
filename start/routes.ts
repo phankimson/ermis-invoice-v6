@@ -14,30 +14,30 @@ const ScawlersController = () => import('#controllers/scawlers_controller')
 
 router.get('/scawler', [ScawlersController, 'load'])
 
-const HoadondientuController = () => import('#controllers/hoadondientu_controller')
+const ApiHoadondientuController = () => import('#controllers/apihoadondientu_controller')
 router
   .group(() => {
     router
       .group(() => {
         router
           .group(() => {
-            router.get('/check-invoice/:tax_code/:invoice_type/:invoice_no/:invoice_code/:tax_amount/:amount',  [HoadondientuController, 'check_invoice']).as('invoice.check') // final name
-
-            router.get('/login-invoice/:key', [HoadondientuController, 'login_invoice']).as('invoice.login')
+            router.any('/check-invoice/:tax_code/:invoice_type/:invoice_no/:invoice_code/:tax_amount/:amount',  [ApiHoadondientuController, 'check_invoice']).as('check') // final name
             
-            router.get('/invoice/:invoice_group?/:invoice_type?/:start_date/:end_date', [HoadondientuController, 'invoice']).as('invoice.invoice')
+            router.any('/login-invoice/:key', [ApiHoadondientuController, 'login_invoice']).as('login')
+           
+            router.any('/invoice/:invoice_group?/:invoice_type?/:start_date/:end_date', [ApiHoadondientuController, 'invoice']).as('invoice')
 
-            router.get('/p-invoice/:invoice_group?/:invoice_type?/:start_date/:end_date/:page_invoice?', [HoadondientuController, 'p_invoice']).as('invoice.p_invoice')
+            router.any('/p-invoice/:invoice_group?/:invoice_type?/:start_date/:end_date/:page_invoice?', [ApiHoadondientuController, 'p_invoice']).as('p_invoice')
           
-            router.get('/e-invoice', [HoadondientuController, 'e_invoice']).as('invoice.e_invoice')
+            router.any('/e-invoice', [ApiHoadondientuController, 'e_invoice']).as('e_invoice')
 
-            router.get('/excel-invoice/:invoice_group?/:invoice_type?/:start_date/:end_date', [HoadondientuController, 'excel_invoice']).as('invoice.excel_invoice')
+            router.any('/excel-invoice/:invoice_group?/:invoice_type?/:start_date/:end_date', [ApiHoadondientuController, 'excel_invoice']).as('excel_invoice')
             
-            router.get('/file-invoice/:invoice_group?/:row', [HoadondientuController, 'file_invoice']).as('invoice.file_invoice')   
+            router.any('/file-invoice/:invoice_group?/:row', [ApiHoadondientuController, 'file_invoice']).as('file_invoice')   
 
-            router.get('/info-user', [HoadondientuController, 'info_user']).as('invoice.info_user')    
+            router.any('/info-user', [ApiHoadondientuController, 'info_user']).as('info_user')    
             
-            router.get('/generate-key/:secret_key/:username/:password/:expiry_start_date/:expiry_end_date', [HoadondientuController, 'generate_key']).as('invoice.generate_key')
+            router.any('/generate-key/:secret_key/:username/:password/:expiry_start_date/:expiry_end_date', [ApiHoadondientuController, 'generate_key']).as('generate_key')
           
           })
           .prefix('v1')
@@ -48,14 +48,15 @@ router
     })
 .prefix('hddt')
 .as('hddt')
-const TracuunttController = () => import('#controllers/tracuunnt_controller')
+
+const ApitracuunntController = () => import('#controllers/apitracuunnt_controller')
 router
   .group(() => {
     router
       .group(() => {
         router
           .group(() => {
-            router.get('/check-mst/:tax_code',  [TracuunttController, 'check_mst']).as('invoice.check_mst') // final name
+            router.get('/check-mst/:tax_code',  [ApitracuunntController, 'check_mst']).as('check_mst') // final name
           })
           .prefix('v1')
           .as('v1')
@@ -66,14 +67,14 @@ router
 .prefix('tcnt')
 .as('tcnt')
 
-const MasothueController = () => import('#controllers/masothue_controller')
+const ApimasothueController = () => import('#controllers/apimasothue_controller')
 router
   .group(() => {
     router
       .group(() => {
         router
           .group(() => {
-            router.get('/check-mst/:tax_code',  [MasothueController, 'check_mst']).as('invoice.check_mst') // final name
+            router.get('/check-mst/:tax_code',  [ApimasothueController, 'check_mst']).as('check_mst') // final name
           })
           .prefix('v1')
           .as('v1')
@@ -83,7 +84,17 @@ router
     })
 .prefix('mst')
 .as('mst')
+const HoadondientuController = () => import('#controllers/hoadondientu_controller')
+router
+  .group(() => {
+    router.get('/', [HoadondientuController, 'index']).as('/')
+    router.get('/index', [HoadondientuController, 'index']).as('index')
+    router.get('/login-key', [HoadondientuController, 'login_key']).as('login_key')
+    })
+.prefix('hoadondientu')
+.as('hoadondientu')
 
 const HomeController = () => import('#controllers/home_controller')
 router.get('/', [HomeController, 'index'])
+router.get('/test', [HomeController, 'test'])
 router.get('/captcha', [HomeController, 'captcha'])

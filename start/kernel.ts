@@ -22,7 +22,7 @@ server.errorHandler(() => import('#exceptions/handler'))
  * requests, even if there is no route registered for
  * the request URL.
  */
-server.use([])
+server.use([() => import('@adonisjs/static/static_middleware'), () => import('@adonisjs/vite/vite_middleware')])
 
 /**
  * The router middleware stack runs middleware on all the HTTP
