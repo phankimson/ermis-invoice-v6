@@ -30,7 +30,7 @@ class Search {
                     await worker.terminate();
                 }             
                  const result:any = [];
-                  result.data =  await this.loadCheckMST("#resultContainer tr:ntn-child(1)", page);
+                  result.data =  await this.loadCheckMST("#resultContainer tr", page);
                  if(page_close){
                  await page.close();
                  }

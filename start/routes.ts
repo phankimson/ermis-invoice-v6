@@ -66,6 +66,24 @@ router
 .prefix('tcnt')
 .as('tcnt')
 
+const MasothueController = () => import('#controllers/masothue_controller')
+router
+  .group(() => {
+    router
+      .group(() => {
+        router
+          .group(() => {
+            router.get('/check-mst/:tax_code',  [MasothueController, 'check_mst']).as('invoice.check_mst') // final name
+          })
+          .prefix('v1')
+          .as('v1')
+      })
+  .prefix('api')
+  .as('api')
+    })
+.prefix('mst')
+.as('mst')
+
 const HomeController = () => import('#controllers/home_controller')
 router.get('/', [HomeController, 'index'])
 router.get('/captcha', [HomeController, 'captcha'])
