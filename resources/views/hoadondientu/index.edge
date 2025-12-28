@@ -85,9 +85,9 @@
                 <div class="uk-grid uk-width-1-1" align = "center">
                 <div class="uk-width-1-1">
                         <label for="start_date" class="uk-form-label">Từ ngày : </label>
-                        <input id="start_date" value="15/12/2025" />
+                        <input id="start_date" value="{{start_date}}" />
                         <label for="end_date" class="uk-form-label">Đến ngày : </label>
-                        <input id="end_date" value="15/12/2025" />
+                        <input id="end_date" value="{{end_date}}" />
                         <div class="margin-top-bottom">
                         <label for="invoice_type" class="uk-form-label">Loại hóa đơn : </label>
                         <select class="droplist width-300" id="invoice_type">
@@ -128,8 +128,8 @@
        
                     <div class="uk-width-1-1">
                         <ul class="uk-tab" data-uk-tab="{connect:'#card_tabs',animation:'slide-horizontal'}">
-                            <li><a href="javascript:;">Hóa đơn đầu ra</a></li>
-                            <li class="uk-active"><a href="javascript:;">Hóa đơn đầu vào</a></li>
+                            <li data-id="1"><a href="javascript:;">Hóa đơn đầu ra</a></li>
+                            <li data-id="2" class="uk-active"><a href="javascript:;">Hóa đơn đầu vào</a></li>
                         </ul>
                         <ul id="card_tabs" class="uk-switcher uk-margin">
                             <li>
@@ -138,39 +138,39 @@
                                     <div class="uk-overflow-container">
                                         <table class="uk-table uk-text-nowrap uk-table-align-vertical">
                                             <thead>
-                                            <tr>
-                                                <th class="uk-width-1-10 uk-text-center">STT</th>
-                                                <th class="uk-width-1-10 uk-text-center">MST người bán</th>
-                                                <th class="uk-width-1-10 uk-text-center">Ký hiệu mẫu số</th>
-                                                <th class="uk-width-1-10 uk-text-center">Ký hiệu hóa đơn</th>
-                                                <th class="uk-width-1-10 uk-text-center">Số hóa đơn</th>
-                                                <th class="uk-width-1-10 uk-text-center">Ngày lập</th>
-                                                <th class="uk-width-1-10 uk-text-center">MST người mua</th>
-                                                <th class="uk-width-2-10 uk-text-center">Tên người mua</th>
-                                                <th class="uk-width-1-10 uk-text-right">Tổng tiền chưa thuế</th>
-                                                <th class="uk-width-1-10 uk-text-right">Tổng tiền thuế</th>
-                                                <th class="uk-width-1-10 uk-text-right">Tổng tiền cktm</th>
-                                                <th class="uk-width-1-10 uk-text-right">Tổng thanh toán</th>
-                                                <th class="uk-width-1-10 uk-text-right">Trạng thái hóa đơn</th>
-                                                <th class="uk-width-3-10 uk-text-right">Kết quả xử lý</th>
+                                            <tr class="md-bg-blue-600 uk-text-contrast">
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">STT</th>
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">MST người bán</th>
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">Ký hiệu mẫu số</th>
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">Ký hiệu hóa đơn</th>
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">Số hóa đơn</th>
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">Ngày lập</th>
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">MST người mua</th>
+                                                <th class="uk-width-2-10 uk-text-center uk-text-contrast">Tên người mua</th>
+                                                <th class="uk-width-1-10 uk-text-right uk-text-contrast">Tổng tiền chưa thuế</th>
+                                                <th class="uk-width-1-10 uk-text-right uk-text-contrast">Tổng tiền thuế</th>
+                                                <th class="uk-width-1-10 uk-text-right uk-text-contrast">Tổng tiền cktm</th>
+                                                <th class="uk-width-1-10 uk-text-right uk-text-contrast">Tổng thanh toán</th>
+                                                <th class="uk-width-1-10 uk-text-right uk-text-contrast">Trạng thái hóa đơn</th>
+                                                <th class="uk-width-3-10 uk-text-right uk-text-contrast">Kết quả xử lý</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <tr>
-                                                <td class="uk-width-1-10 uk-text-center">Table Data</td>
-                                                <td class="uk-width-1-10 uk-text-center">Table Data</td>
-                                                <td class="uk-width-1-10 uk-text-center">Table Data</td>
-                                                <td class="uk-width-1-10 uk-text-center">Table Data</td>
-                                                <td class="uk-width-1-10 uk-text-center">Table Data</td>
-                                                <td class="uk-width-1-10 uk-text-center">Table Data</td>
-                                                <td class="uk-width-1-10 uk-text-center">Table Data</td>
-                                                <td class="uk-width-2-10 uk-text-center">Table Data</td>
-                                                <td class="uk-width-1-10 uk-text-right">Table Data</td>
-                                                <td class="uk-width-1-10 uk-text-right">Table Data</td>
-                                                <td class="uk-width-1-10 uk-text-right">Table Data</td>
-                                                <td class="uk-width-1-10 uk-text-right">Table Data</td>
-                                                <td class="uk-width-1-10 uk-text-center">Table Data</td>
-                                                <td class="uk-width-3-10 uk-text-center">Table Data</td>
+                                            <tr class="hidden">
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-2-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-right"></td>
+                                                <td class="uk-width-1-10 uk-text-right"></td>
+                                                <td class="uk-width-1-10 uk-text-right"></td>
+                                                <td class="uk-width-1-10 uk-text-right"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-3-10 uk-text-center"></td>
                                             </tr>                                            
                                             </tbody>
                                         </table>
@@ -188,7 +188,67 @@
                                 </div>
                             </li>
                             <li>
-                            <div id="grid2"></div>
+                            <div class="md-card uk-margin-medium-bottom">
+                                <div id="grid2" class="md-card-content">
+                                    <div class="uk-overflow-container">
+                                        <table class="uk-table uk-text-nowrap uk-table-align-vertical">
+                                            <thead>
+                                            <tr class="md-bg-blue-600">
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">STT</th>
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">MST người bán</th>
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">Ký hiệu mẫu số</th>
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">Ký hiệu hóa đơn</th>
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">Số hóa đơn</th>
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">Ngày lập</th>
+                                                <th class="uk-width-1-10 uk-text-center uk-text-contrast">MST người mua</th>
+                                                <th class="uk-width-2-10 uk-text-center uk-text-contrast">Tên người mua</th>
+                                                <th class="uk-width-1-10 uk-text-right uk-text-contrast">Tổng tiền chưa thuế</th>
+                                                <th class="uk-width-1-10 uk-text-right uk-text-contrast">Tổng tiền thuế</th>
+                                                <th class="uk-width-1-10 uk-text-right uk-text-contrast">Tổng tiền cktm</th>
+                                                <th class="uk-width-1-10 uk-text-right uk-text-contrast">Tổng phí</th>
+                                                <th class="uk-width-1-10 uk-text-right uk-text-contrast">Tổng thanh toán</th>
+                                                <th class="uk-width-1-10 uk-text-right uk-text-contrast">Đơn vị tính</th>
+                                                <th class="uk-width-1-10 uk-text-right uk-text-contrast">Trạng thái hóa đơn</th>
+                                                <th class="uk-width-3-10 uk-text-right uk-text-contrast">Kết quả xử lý</th>
+                                                <th class="uk-width-3-10 uk-text-right uk-text-contrast">Kiểm tra hóa đơn</th>
+                                                <th class="uk-width-3-10 uk-text-right uk-text-contrast">Kiểm tra MST</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr class="hidden">
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-2-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-right"></td>
+                                                <td class="uk-width-1-10 uk-text-right"></td>
+                                                <td class="uk-width-1-10 uk-text-right"></td>
+                                                <td class="uk-width-1-10 uk-text-right"></td>
+                                                <td class="uk-width-1-10 uk-text-right"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-1-10 uk-text-center"></td>
+                                                <td class="uk-width-3-10 uk-text-center"></td>
+                                                <td class="uk-width-3-10 uk-text-center"></td>
+                                                <td class="uk-width-3-10 uk-text-center"></td>
+                                            </tr>                                            
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                        <ul class="uk-pagination uk-margin-medium-top">
+                                            <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+                                            <li class="uk-active"><span>1</span></li>
+                                            <li><a href="#">2</a></li>
+                                            <li><a href="#">3</a></li>
+                                            <li><a href="#">4</a></li>
+                                            <li><span>&hellip;</span></li>
+                                            <li><a href="#">10</a></li>
+                                            <li><a href="#"><i class="uk-icon-angle-double-right"></i></a></li>
+                                        </ul>
+                                </div>
                             </li>
                         </ul>
                     </div>

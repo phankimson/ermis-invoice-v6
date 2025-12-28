@@ -4,6 +4,7 @@ var Ermis = function () {
         ErmisKendoDatePickerTemplate("#start_date","dd/MM/yyyy");
         ErmisKendoDatePickerTemplate("#end_date","dd/MM/yyyy");
         ErmisKendoDroplistTemplate('#invoice_type',false);
+        jQuery("#load_invoice").on('click ', initLoadInvoice);
     }
 
     var initLoadInfoUser = function(e){
@@ -17,6 +18,53 @@ var Ermis = function () {
                      window.location.href = 'login-key';
                 }
             );
+    }
+
+    var initLoadInvoice = function(e){
+        let start_date = jQuery("#start_date").val().replaceAll("/", "-");
+        let end_date = jQuery("#end_date").val().replaceAll("/", "-");
+        let invoice_type = jQuery("#invoice_type").val();
+        let invoice_group = jQuery(".uk-tab li.uk-active").attr("data-id");  
+        let page = jQuery("grid"+invoice_group+" .uk-pagination .uk-active span").text();      
+        var url = UrlString("hddt/api/v1/p-invoice/"+invoice_group+"/"+invoice_type+"/"+start_date+"/"+end_date+"/"+page);
+        ErmisTemplateAjaxPostApi0(e,url,
+        function(result){ 
+                result.forEach(function(rs, index) {
+                     var clone = jQuery("#grid"+invoice_group+" tbody tr.hidden").first().clone(true);
+                     var name = '';
+                     clone.find("td").each(function(i) {
+                     const $th = $(this);  
+                     $th.text(rs[i]); 
+                     if(i < 6){
+                        $th.text(rs[i]); 
+                     }else if(i == 6){
+                        var arr = rs[i].split(":");
+                        //console.log(arr);
+                        if(arr[1] != undefined && arr[2] != undefined){
+                            var mst_text = arr[1].trimLeft().split(" ");
+                            name = arr[2];
+                            if(mst_text[0] != undefined){
+                              $th.text(mst_text[0].replace("Tên","")); 
+                            }
+                        }                     
+                     }else if(i == 7){
+                        $th.text(name);
+                     }else if(i == 16 || i == 17){
+                        $th.text("");
+                     }else{
+                        $th.text(rs[i-1]); 
+                     }
+                  
+                    });
+                    clone.removeClass("hidden");
+                    clone.insertAfter("#grid"+invoice_group+" tbody tr.hidden");
+                });              
+               
+        },
+        function(result){         
+                kendo.alert(result);
+        }
+    );
     }
 
 

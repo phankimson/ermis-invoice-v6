@@ -82,7 +82,8 @@ class Help {
             if(params.url != params.current_url){
               await this.clickMenuInvoice(".flex-space",page,'5','1');
             }    
-          }                         
+          }  
+             await new Promise(resolve => setTimeout(resolve, 4000));                       
              await page.waitForSelector(params.selector, { visible : true });   
             const rs = await page.$$eval(params.selector+' td', elements => {
               // Inside this function, you are in the browser's JavaScript environment
