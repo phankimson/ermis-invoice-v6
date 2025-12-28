@@ -7,11 +7,19 @@ export default class SecretKeyMiddleware {
      * Middleware logic goes here (before the next call)
      */
     const mst = ctx.session.get("mst")
-
+    const url =  ctx.request.url().split('/');
+    if(!mst){
+      if(url.length==3 && url[2] != 'login-key'){
+        ctx.response.redirect().toPath('login-key')
+      }
+    }else{
+      if(url.length==3 && url[2] == 'login-key'){
+        ctx.response.redirect().toPath('index')
+      }
+    }
     /**
      * Call next method in the pipeline and return its output
      */
-    const output = await next()
-    return output
+    await next()
   }
 }

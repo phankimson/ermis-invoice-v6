@@ -8,7 +8,7 @@
 */
 
 import router from '@adonisjs/core/services/router'
-
+import { middleware } from '#start/kernel'
 
 const ScawlersController = () => import('#controllers/scawlers_controller')
 
@@ -87,12 +87,15 @@ router
 const HoadondientuController = () => import('#controllers/hoadondientu_controller')
 router
   .group(() => {
+
     router.get('/', [HoadondientuController, 'index']).as('/')
-    router.get('/index', [HoadondientuController, 'index']).as('index').middleware(['checkSessionCustom'])
+    router.get('/index', [HoadondientuController, 'index']).as('index')
+
     router.get('/login-key', [HoadondientuController, 'login_key']).as('login_key')
     })
 .prefix('hoadondientu')
 .as('hoadondientu')
+.use(middleware.check_secret_key())
 
 const HomeController = () => import('#controllers/home_controller')
 router.get('/', [HomeController, 'index'])

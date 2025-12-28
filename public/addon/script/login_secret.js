@@ -16,7 +16,7 @@ Ermis_login_secret = {
                     window.location.href = 'index';
                 },
                 function(result){
-                    jQuery('#notification').EPosMessage('error', result);
+                      kendo.alert(result);
                 }
             );
         };
