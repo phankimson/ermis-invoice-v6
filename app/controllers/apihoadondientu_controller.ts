@@ -32,6 +32,7 @@ export default class ApihoadondientuController {
                 response.status(400).send("Tài khoản của bạn đã đăng nhập sai quá nhiều lần, vui lòng liên hệ admin (" + env.get('CONTACT_ADMIN') + ") để được hỗ trợ");
                 return;
             }     
+             try {
             const result =await help.login(url, obj);
             if(result.status == true){
                  session.forget(obj.username);
@@ -44,7 +45,12 @@ export default class ApihoadondientuController {
                  session.put(obj.username, count_mst + 1);
                  response.status(404).send("Đăng nhập không thành công vui lòng kiểm tra lại tài khoản hoặc liên hệ admin (" + env.get('CONTACT_ADMIN') + ") để được hỗ trợ");
                  return;
-            }           
+            } 
+        } catch (err) {    
+            response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
+            return;
+            //session.forget("browserWSEndpoint");
+        }      
         }      
     }
 
@@ -65,10 +71,10 @@ export default class ApihoadondientuController {
          try {
         const rs = await help.loadInfoUser(params);
         session.put("current_url", params.url);
-        response.json(rs);
+        response.json(JSON.stringify(rs));
         return;
         } catch (err) {
-            response.status(502).send("Lỗi khi lấy xử lý dữ liệu");  
+            response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
             return;
             //session.forget("browserWSEndpoint");
         }
@@ -89,10 +95,10 @@ export default class ApihoadondientuController {
         try {
             const rs = await help.loadAllInvoice(params);
             session.put("current_url", params.url);
-            response.json(rs);
+            response.json(JSON.stringify(rs));
         return;
         } catch (err) {
-           response.status(502).send("Lỗi khi lấy xử lý dữ liệu"); 
+           response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
            return; 
             //session.forget("browserWSEndpoint");
         }
@@ -114,10 +120,10 @@ export default class ApihoadondientuController {
         try {
             const rs = await help.loadPageInvoice(params);
             session.put("current_url", params.url);
-            response.json(rs);
+            response.json(JSON.stringify(rs));
         return;
         } catch (err) {
-           response.status(502).send("Lỗi khi lấy xử lý dữ liệu"); 
+           response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
            return; 
             //session.forget("browserWSEndpoint");
         }
@@ -138,7 +144,7 @@ export default class ApihoadondientuController {
             response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
             return;
         }
-        //try {
+        try {
             const rs = await help.fileInvoice(params);
              if(rs.status){  
                 response.status(200).send("Tải file thành công");  
@@ -147,11 +153,11 @@ export default class ApihoadondientuController {
              }
             session.put("current_url", params.url);
             return;
-        //} catch (err) {
-        //   response.status(502).send("Lỗi khi lấy xử lý dữ liệu"); 
-        //   return; 
+        } catch (err) {
+           response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
+           return; 
             //session.forget("browserWSEndpoint");
-        //}
+        }
     }
 
     public async excel_invoice({ response , session, params  }: HttpContext ) {
@@ -181,7 +187,7 @@ export default class ApihoadondientuController {
         session.put("current_url", params.url);
         return;
         } catch (err) {
-            response.status(502).send("Lỗi khi lấy xử lý dữ liệu");   
+            response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
             return; 
             //session.forget("browserWSEndpoint");
         }
@@ -226,8 +232,15 @@ export default class ApihoadondientuController {
     public async check_invoice({ response , params }: HttpContext ) {
         const help = new HDDT.default();
         const url = env.get('URL_HOADONDIENTU');
+        try {
         const result = await help.checkInvoice(url, params, true);
         response.json(result);
+        return
+          } catch (err) {
+             response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
+            return; 
+            //session.forget("browserWSEndpoint");
+        }
     }
 
     public async generate_key({ response , params }: HttpContext) {       

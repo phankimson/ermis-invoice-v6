@@ -12,6 +12,7 @@ class Help {
             const browser = await puppeteer.launch({ headless: env.get('HEADLESS') , defaultViewport: null}); // khởi tạo browser
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL
+            await page.waitForSelector('button.ant-modal-close', { visible : true });
             await page.click("button.ant-modal-close");
             // Click the open login form mobile
             //await page.click("button.ant-btn-icon-only");    
@@ -84,7 +85,7 @@ class Help {
             }    
           }  
              await new Promise(resolve => setTimeout(resolve, 4000));                       
-             await page.waitForSelector(params.selector, { visible : true });   
+             await page.waitForSelector(params.selector, { timeout: 2000 });   
             const rs = await page.$$eval(params.selector+' td', elements => {
               // Inside this function, you are in the browser's JavaScript environment
               return elements.map(el => el.textContent.trim());
@@ -117,11 +118,11 @@ class Help {
           let TableData:any;
           let i:number = 1;
           let total:number = 0;
-          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { visible : true });
+          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { timeout: 2000 });
           const pageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
           total = parseInt(String(pageTotal).replace(i+" / ", ""));
           while(i <= total){
-            await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { visible : true });
+            await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { timeout: 2000 });
             const Total_current = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
             total = parseInt(String(Total_current).replace(i+" / ", ""));
             //console.log(total);
@@ -142,14 +143,14 @@ class Help {
             if(i < total){
               // Click button next      
               await new Promise(resolve => setTimeout(resolve, 4000)).then(async() => 
-                 await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)', { visible : true }),
+                 await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)', { timeout: 2000 }),
                  await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)') 
               );
               i++;
             }else if(i > total){
               // Click button prev 
               await new Promise(resolve => setTimeout(resolve, 4000)).then(async() => 
-              await page.waitForSelector(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)', { visible : true }),
+              await page.waitForSelector(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)', { timeout: 2000 }),
               await page.click(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)') 
               );
               i--;  
@@ -187,44 +188,45 @@ class Help {
             ele = ".ant-tabs-tabpane-active:nth-child(2)";
            }    
           let rs:any = [];  
-          await this.changeInvoiceGroup(page,ele,params);         
-          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { visible : true });
+          await this.changeInvoiceGroup(page,ele,params); 
+          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { timeout: 2000 });
           const textpageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
           let pageTotal = String(textpageTotal).split("/");
           let pageCurrent = parseInt(pageTotal[0]);
           let total = parseInt(pageTotal[1]);
-          //console.log(total);
           //console.log(pageCurrent);
           if(page_invoice == total && total == 1){
               await this.fillSearchInvoice(page,ele,params); 
           }   
             if(page_invoice<=total){
-              while(pageCurrent <= page_invoice || pageCurrent > page_invoice){                             
-              await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { visible : true });
+              while(pageCurrent <= page_invoice || pageCurrent > page_invoice){       
+              await new Promise(resolve => setTimeout(resolve, 1000))                        
+              await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { timeout: 2000 });
               const textrspageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
               pageTotal = String(textrspageTotal).split("/");
               pageCurrent = parseInt(pageTotal[0]);
               total = parseInt(pageTotal[1]);
+              //console.log(total);
                if(pageCurrent < page_invoice){
               // Click button next      
                  await new Promise(resolve => setTimeout(resolve, 4000)).then(async() => 
-                 await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)', { visible : true }),
+                 await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)', { timeout: 2000 }),
                  await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)') 
               );
               pageCurrent++;
               }else if(pageCurrent > page_invoice || pageCurrent > total ){
                 // Click button prev 
                 await new Promise(resolve => setTimeout(resolve, 4000)).then(async() => 
-                await page.waitForSelector(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)', { visible : true }),
+                await page.waitForSelector(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)', { timeout: 2000 }),
                 await page.click(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)') 
                 );
                 pageCurrent--;  
               }else{
 
               }
-              await new Promise(resolve => setTimeout(resolve, 2000));   
-              await page.waitForSelector(ele+params.selector, { timeout: 1000 }).then( async () => {
-                rs = await page.$$eval(ele+params.selector, elements => {
+              await new Promise(resolve => setTimeout(resolve, 4000));   
+              await page.waitForSelector(ele+params.selector, { timeout: 2000 }).then( async () => {
+                const data = await page.$$eval(ele+params.selector, elements => {
                     // Inside this function, you are in the browser's JavaScript environment
                     return elements.map(row => {
                       // For each row, select all cells (td) and get their text content
@@ -232,8 +234,9 @@ class Help {
                       return cells.map(cell => cell.innerText.trim());
                     });
                   }); 
+                  rs = {page_current: pageCurrent, total_page: total, data : data }
                 }).catch(async (e)=> {
-                  rs = [];
+                  rs = { page_current: 1, total_page: 1, data : [] };
                 });  
                 if(pageCurrent == page_invoice){
                   break;
@@ -243,8 +246,7 @@ class Help {
         if(params.page_close){
             await page.close();
           }
-       }       
-               
+       }        
         return rs;        
     }
 
@@ -288,7 +290,7 @@ class Help {
          await this.fillSearchInvoice(page,ele,params);
          //const imageItems = await page.$eval(ele+selector, element => element.innerHTML);
          //console.log(imageItems);
-          await page.waitForSelector(ele+params.selector, { timeout: 3000 }).then(async () => {
+          await page.waitForSelector(ele+params.selector, { timeout: 2000 }).then(async () => {
             const current_element = await page.$(ele+params.selector);          
             await current_element.click();    
             rs.status = true;  
@@ -321,7 +323,7 @@ class Help {
            }         
          // Define the download directory relative to the current working directory
          // Tìm số page hiện tại
-          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { visible : true });
+          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { timeout: 2000 });
           const textpageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
           let pageTotal = String(textpageTotal).split("/");
           let pageCurrent = parseInt(pageTotal[0]);
@@ -432,43 +434,52 @@ class Help {
           await page.waitForSelector(selector, { visible : true });     
           await page.click(selector+' .ant-tabs-tab:nth-child('+invoice_type+')');    
           //
-          await page.waitForSelector(selector+' #tngay svg',  { visible : true }); 
+          await page.waitForSelector(selector+' #tngay svg',  { timeout: 2000 }); 
           await page.click(selector+' #tngay svg');    
-          await page.waitForSelector(selector+' #tngay input',  { visible : true }); 
+          await new Promise(resolve => setTimeout(resolve, 500))
+          await page.waitForSelector(selector+' #tngay input',  { timeout: 2000 }); 
           await page.click(selector+' #tngay input');
-          await page.waitForSelector('.ant-calendar-input ',  { visible : true });  
+          await new Promise(resolve => setTimeout(resolve, 500))
+          await page.waitForSelector('.ant-calendar-input ',  { timeout: 2000 });  
           await page.type(".ant-calendar-input ", start_date, { delay: 100 });
           await page.click(selector+' .ld-header');
           // 
-          await page.waitForSelector(selector+' #dngay svg',  { visible : true }); 
+          await page.waitForSelector(selector+' #dngay svg', { timeout: 2000 }); 
           await page.click(selector+' #dngay svg');
-          await page.waitForSelector(selector+' #dngay input',  { visible : true }); 
+          await new Promise(resolve => setTimeout(resolve, 500));
+          await page.waitForSelector(selector+' #dngay input', { timeout: 2000 }); 
           await page.click(selector+' #dngay input');
-          await page.waitForSelector('.ant-calendar-input ',  { visible : true });  
+          await new Promise(resolve => setTimeout(resolve, 500));
+          await page.waitForSelector('.ant-calendar-input ', { timeout: 2000 });  
           await page.type(".ant-calendar-input ", end_date, { delay: 100 });
           await page.click(selector+' .ld-header');          
 
            if(invoice_type == 2 && invoice_group == 2){
-            await page.waitForSelector(selector+' #ttxly',  { visible : true }); 
-            await page.click(selector+' #ttxly');
-            await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(3)',  { visible : true }); 
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            await page.waitForSelector(selector+' #ttxly',  { timeout: 2000 }); 
+            await page.click(selector+' #ttxly'); 
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(3)',  { timeout: 2000 }); 
             await page.click('.ant-select-dropdown-menu-item:nth-child(3)'); // Select
           }
-          await page.waitForSelector(selector+' button[type="submit"]',{ visible : true });
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          await page.waitForSelector(selector+' button[type="submit"]',{ timeout: 2000 });
           await page.click(selector+' button[type="submit"]');
            if(invoice_type == 2 && invoice_group == 2){
-            await page.waitForSelector(selector+' #ttxly',  { visible : true }); 
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            await page.waitForSelector(selector+' #ttxly',  { timeout: 2000 }); 
             await page.click(selector+' #ttxly');
-            await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(1)',  { visible : true }); 
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(1)',  { timeout: 2000 }); 
             await page.click('.ant-select-dropdown-menu-item:nth-child(1)'); // Reset
           }
           //   
-           await new Promise(resolve => setTimeout(resolve, 2000))
-           await page.waitForSelector(selector+' .ant-row-flex-start .ant-select-selection--single',  { visible : true });
-           await page.click(selector+' .ant-row-flex-start .ant-select-enabled');
-           await new Promise(resolve => setTimeout(resolve, 1000))
-           await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(3)',  { visible : true });
-           await page.click(".ant-select-dropdown-menu-item:nth-child(3)");
+           //await new Promise(resolve => setTimeout(resolve, 1800))
+           //await page.waitForSelector(selector+' .ant-row-flex-start .ant-select-selection--single',  { visible : true });
+           //await page.click(selector+' .ant-row-flex-start .ant-select-enabled');
+           //await new Promise(resolve => setTimeout(resolve, 800))
+           //await page.waitForSelector('.ant-select-dropdown-menu-item:nth-child(3)',  { visible : true });
+           //await page.click(".ant-select-dropdown-menu-item:nth-child(3)");
     }
       
   async captcha(page:any,selector:string) {
