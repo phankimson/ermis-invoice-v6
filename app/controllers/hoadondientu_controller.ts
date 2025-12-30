@@ -7,6 +7,7 @@ export default class HoadondientuController {
         let end_date = moment().format("DD/MM/YYYY");
         return view.render('hoadondientu/index', { start_date: start_date,end_date : end_date  })
     }
+
     public async login_key({ view ,session}: HttpContext) {
         session.forget("mst");
         return view.render('hoadondientu/login_key')

@@ -144,3 +144,11 @@ function UrlStringPath (url,path){
 
   return string;
 }
+
+function search(nameKey, valueKey, myArray){
+    for (let i=0; i < myArray.length; i++) {
+        if (myArray[i][nameKey] === valueKey) {
+            return myArray[i];
+        }
+    }
+}

@@ -46,7 +46,8 @@ export default class ApihoadondientuController {
                  response.status(404).send("Đăng nhập không thành công vui lòng kiểm tra lại tài khoản hoặc liên hệ admin (" + env.get('CONTACT_ADMIN') + ") để được hỗ trợ");
                  return;
             } 
-        } catch (err) {    
+        } catch (err) {  
+            session.put("current_url", url);  
             response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
             return;
             //session.forget("browserWSEndpoint");
@@ -74,6 +75,7 @@ export default class ApihoadondientuController {
         response.json(JSON.stringify(rs));
         return;
         } catch (err) {
+            session.put("current_url", params.url);
             response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
             return;
             //session.forget("browserWSEndpoint");
@@ -98,6 +100,7 @@ export default class ApihoadondientuController {
             response.json(JSON.stringify(rs));
         return;
         } catch (err) {
+           session.put("current_url", params.url);
            response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
            return; 
             //session.forget("browserWSEndpoint");
@@ -123,6 +126,7 @@ export default class ApihoadondientuController {
             response.json(JSON.stringify(rs));
         return;
         } catch (err) {
+           session.put("current_url", params.url);  
            response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
            return; 
             //session.forget("browserWSEndpoint");
@@ -154,6 +158,7 @@ export default class ApihoadondientuController {
             session.put("current_url", params.url);
             return;
         } catch (err) {
+             session.put("current_url", params.url);  
            response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
            return; 
             //session.forget("browserWSEndpoint");
@@ -168,7 +173,7 @@ export default class ApihoadondientuController {
         params.selector = " .ant-row-flex-start #icon_ketxuat";
         params.page_close = false;
         params.download = 'downloads/'+session.get("mst");
-        //params.filename = 'DANH SÁCH HÓA ĐƠN.xlsx';
+        params.filename = 'DANH SÁCH HÓA ĐƠN.xlsx';
         //console.log(browserWSEndpoint);
             if(!params.browserWSEndpoint){
                 response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
@@ -180,13 +185,13 @@ export default class ApihoadondientuController {
             //const filePath = app.makePath(params.download+'/'+params.filename);            
             //await unlink(filePath);
              response.status(200).send("Xuất excel thành công");      
-        
             }else{
              response.status(404).send("Xuất excel thất bại");     
             }
         session.put("current_url", params.url);
         return;
         } catch (err) {
+            session.put("current_url", params.url); 
             response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
             return; 
             //session.forget("browserWSEndpoint");

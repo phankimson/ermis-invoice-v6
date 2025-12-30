@@ -207,26 +207,30 @@ class Help {
               pageTotal = String(textrspageTotal).split("/");
               pageCurrent = parseInt(pageTotal[0]);
               total = parseInt(pageTotal[1]);
+              let timeout = 2000;
+              if(total == 1){
+                timeout = 4000;
+              }
               //console.log(total);
                if(pageCurrent < page_invoice){
               // Click button next      
-                 await new Promise(resolve => setTimeout(resolve, 4000)).then(async() => 
-                 await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)', { timeout: 2000 }),
+                 await new Promise(resolve => setTimeout(resolve, timeout)).then(async() => 
+                 await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)', { timeout: timeout }),
                  await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)') 
               );
               pageCurrent++;
               }else if(pageCurrent > page_invoice || pageCurrent > total ){
                 // Click button prev 
-                await new Promise(resolve => setTimeout(resolve, 4000)).then(async() => 
-                await page.waitForSelector(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)', { timeout: 2000 }),
+                await new Promise(resolve => setTimeout(resolve, timeout)).then(async() => 
+                await page.waitForSelector(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)', { timeout: timeout }),
                 await page.click(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)') 
                 );
                 pageCurrent--;  
               }else{
 
               }
-              await new Promise(resolve => setTimeout(resolve, 4000));   
-              await page.waitForSelector(ele+params.selector, { timeout: 2000 }).then( async () => {
+              await new Promise(resolve => setTimeout(resolve, timeout));   
+              await page.waitForSelector(ele+params.selector, { timeout: timeout }).then( async () => {
                 const data = await page.$$eval(ele+params.selector, elements => {
                     // Inside this function, you are in the browser's JavaScript environment
                     return elements.map(row => {
