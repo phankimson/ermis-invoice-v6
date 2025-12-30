@@ -20,16 +20,17 @@ class Help {
             //page.$eval('.header-item:last-child span', element =>
             //    element.click()
             //);              
-            //console.log('Browser WSEndpoint:', browserWSEndpoint);
+
             // Click the open login form desktop            
             page.$eval('.home-header-menu-item:last-child span', element =>
                 element.click()
-            );    
+            );             
+            // Nhập username, password trước khi lấy captcha
+            await this.fillUsernamePassword(".home-tabs-login", page, obj.username, obj.password);
            
             const text:string = await this.captcha(page,".home-tabs-login .Captcha__Image-sc-1up1k1e-1");
-            //console.log(solution);
 
-            await this.fillLogin(".home-tabs-login", page, text, obj.username, obj.password);
+            await this.fillLogin(".home-tabs-login", page, text);
             // You are now logged in. Proceed with your scraping logic here
             //console.log('Logged in. Current URL:', page.url());
             const login:any = [];
@@ -200,7 +201,7 @@ class Help {
           }   
             if(page_invoice<=total){
               while(pageCurrent <= page_invoice || pageCurrent > page_invoice){       
-              await new Promise(resolve => setTimeout(resolve, 1000))                        
+              await new Promise(resolve => setTimeout(resolve, 2000))                        
               await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { timeout: 2000 });
               const textrspageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
               pageTotal = String(textrspageTotal).split("/");
@@ -525,12 +526,15 @@ class Help {
             return text;
   }
 
-  async fillLogin(selector:string, page:any, text:string , username:string, password:string) {
-              // Type the credentials into the form fields
+  async fillUsernamePassword(selector:string, page:any, username:string, password:string) {
+     // Type the credentials into the form fields
             await page.waitForSelector(selector + " #username",{ visible : true });
             await page.type(selector + " #username", username, { delay: 100 }); // Replace '#username' with the actual selector for the username/email input field
             await page.waitForSelector(selector + " #password",{ visible : true });
             await page.type(selector + " #password", password, { delay: 100 }); // Replace '#password' with the actual selector for the password input field
+  }
+
+  async fillLogin(selector:string, page:any, text:string ) {         
             await page.waitForSelector(selector + " #cvalue",{ visible : true });
             await page.type(selector + " #cvalue", text, { delay: 100 });
             // Click the "Sign In" button to complete the login process.

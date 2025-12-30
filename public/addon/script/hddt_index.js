@@ -1,5 +1,5 @@
 var Ermis = function () {
-
+    const arr = [];
     var initKendoDatePicker = function(){
         ErmisKendoDatePickerTemplate("#start_date","dd/MM/yyyy");
         ErmisKendoDatePickerTemplate("#end_date","dd/MM/yyyy");
@@ -27,15 +27,18 @@ var Ermis = function () {
         let end_date = jQuery("#end_date").val().replaceAll("/", "-");
         let invoice_type = jQuery("#invoice_type").val();
         let invoice_group = jQuery(".uk-tab li.uk-active").attr("data-id");  
-        let page = jQuery("#grid"+invoice_group+" .uk-pagination .uk-active span").text();      
+        let page = jQuery("#grid_pagination_"+invoice_group).find("li").length > 0 ?jQuery("#grid_pagination_"+invoice_group).pagination('getCurrentPage'):1;    
         var url = UrlString("hddt/api/v1/p-invoice/"+invoice_group+"/"+invoice_type+"/"+start_date+"/"+end_date+"/"+page);
         ErmisTemplateAjaxPostApi0(e,url,
-        function(result){ 
-            result = JSON.parse(result);
+        function(result){
+             result = JSON.parse(result);
+             arr.push(result);
             if(result.data.length>0){
                 jQuery("#grid"+invoice_group+" tbody tr:not(.hidden)").remove();
                 initLoadDataInvoice(result.data,invoice_group);
-                initLoadInvoicePage(invoice_group,result.page_current,result.total_page);
+                if(arr[start_date+'&'+end_date] == undefined){
+                    initLoadInvoicePage(invoice_group,parseInt(page),result.total_page);
+                }
             }                             
         },
         function(result){         
@@ -82,27 +85,6 @@ var Ermis = function () {
                 });  
     }
 
-    var initClickPageInvoice = function(e){
-            let invoice_group = jQuery(".uk-tab li.uk-active").attr("data-id");  
-            let invoice_type = jQuery("#invoice_type").val();
-            let start_date = jQuery("#start_date").val().replaceAll("/", "-");
-            let end_date = jQuery("#end_date").val().replaceAll("/", "-");
-            let page =  jQuery("#grid_pagination_"+invoice_group).pagination('getCurrentPage');
-            var url = UrlString("hddt/api/v1/p-invoice/"+invoice_group+"/"+invoice_type+"/"+start_date+"/"+end_date+"/"+page);
-            ErmisTemplateAjaxPostApi0(e,url,
-            function(result){ 
-                result = JSON.parse(result);
-                if(result.data.length>0){
-                    jQuery("#grid"+invoice_group+" tbody tr:not(.hidden)").remove();
-                    initLoadDataInvoice(result.data,invoice_group);                    
-                } 
-            },
-            function(result){         
-                    kendo.alert(result);
-            }
-          );       
-    }
-
     var initLoadInvoicePage = function(invoice_group,page_current,total_page){
         jQuery("#grid_pagination_"+invoice_group).pagination({
             items: total_page,
@@ -114,7 +96,7 @@ var Ermis = function () {
             nextText : '&raquo;',
             currentPage: page_current,
             cssStyle: 'light-theme',
-            onInit : initClickPageInvoice,
+            onInit : initLoadInvoice,
         });
     }
 
