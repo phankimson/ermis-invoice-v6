@@ -31,15 +31,15 @@ var Ermis = function () {
         var url = UrlString("hddt/api/v1/p-invoice/"+invoice_group+"/"+invoice_type+"/"+start_date+"/"+end_date+"/"+page);
         ErmisTemplateAjaxPostApi0(e,url,
         function(result){
-             result = JSON.parse(result);
-             arr.push(result);
+             result = JSON.parse(result);            
             if(result.data.length>0){
                 jQuery("#grid"+invoice_group+" tbody tr:not(.hidden)").remove();
                 initLoadDataInvoice(result.data,invoice_group);
                 if(arr[start_date+'&'+end_date] == undefined){
                     initLoadInvoicePage(invoice_group,parseInt(page),result.total_page);
                 }
-            }                             
+                    arr[start_date+'&'+end_date][page.toString()] = JSON.stringify(result);                 
+                }                             
         },
         function(result){         
                 kendo.alert(result);
