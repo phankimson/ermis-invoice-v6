@@ -6,7 +6,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 export default class HomeController {
 
     public async index({ response }: HttpContext) {
-         response.redirect().toRoute('hoadondientu./')
+         response.redirect().toRoute('invoice./')
     }    
 
     public async test({ view }: HttpContext) {
