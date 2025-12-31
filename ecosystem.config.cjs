@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'ermis-invoice',
-      script: './server.js',
+      script: './bin/server.js',
       instances: 'max',
       exec_mode: 'cluster',
       autorestart: true,
