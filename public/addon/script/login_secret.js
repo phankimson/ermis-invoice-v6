@@ -10,6 +10,10 @@ Ermis_login_secret = {
          // show login form (hide other forms)
         var btnConnect = function(e) {
             let secret_key = jQuery("#login_secret_key").val();
+            if(secret_key == ''){
+                kendo.alert("Vui lòng nhập Mã bí mật!");
+                return;
+            }
             var url = UrlString("hddt/api/v1/login-invoice/"+secret_key);
             ErmisTemplateAjaxPostApi0(e,url,
                 function(){
