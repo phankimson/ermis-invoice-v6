@@ -26,6 +26,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   MODEL_CAPCHA_HDDT: Env.schema.string(),
   PAGE_REDIRECTION:Env.schema.boolean(),
   HEADLESS:Env.schema.boolean(),
+  executablePath:Env.schema.string(),
   /*
   |----------------------------------------------------------
   | Variables for configuring session package

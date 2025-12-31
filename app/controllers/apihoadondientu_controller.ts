@@ -150,8 +150,7 @@ export default class ApihoadondientuController {
         }
         try {
             const rs = await help.fileInvoice(params);
-            result.link_xml_download = rs.xmlPath+'/invoice.xml';
-            result.link_pdf_download = rs.pdfPath+'/invoice.pdf';
+            result.link_download = rs.link_download+'.zip';
              if(rs.status){  
                 result.message = "Tải file thành công";
                 response.json(result);  
@@ -186,7 +185,7 @@ export default class ApihoadondientuController {
         }
         try {
             const rs = await help.fileTypeInvoice(params);
-            result.link_download = rs.item_path+'/invoice.'+params.type_file;
+            result.link_download = rs.link_download+'.zip';
              if(rs.status){  
                 result.message = "Tải file thành công";
                 response.json(result);  
@@ -212,7 +211,7 @@ export default class ApihoadondientuController {
         params.page_close = false;
         params.download = 'downloads/'+session.get("mst");
         const result:any = {};
-        result.link_download = params.download+'/DANH SÁCH HÓA ĐƠN.xlsx';
+        result.link_download = params.download+'/danh_sach_hoa_don.xlsx';
         //console.log(browserWSEndpoint);
             if(!params.browserWSEndpoint){
                 response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');

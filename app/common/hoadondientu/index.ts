@@ -4,16 +4,53 @@ import * as cheerio from 'cheerio';
 import env from '#start/env'
 import path from 'path'
 import fs from 'fs'
-import { createReadStream } from 'fs'
-import unzipper from 'unzipper'
+import zl from "zip-lib"
 
+
+const minimal_args = [
+  '--disable-speech-api', // 	Disables the Web Speech API (both speech recognition and synthesis)
+  '--disable-background-networking', // Disable several subsystems which run network requests in the background. This is for use 									  // when doing network performance testing to avoid noise in the measurements. ↪
+  '--disable-background-timer-throttling', // Disable task throttling of timer tasks from background pages. ↪
+  '--disable-backgrounding-occluded-windows',
+  '--disable-breakpad',
+  '--disable-client-side-phishing-detection',
+  '--disable-component-update',
+  '--disable-default-apps',
+  '--disable-dev-shm-usage',
+  '--disable-domain-reliability',
+  '--disable-extensions',
+  '--disable-features=AudioServiceOutOfProcess',
+  '--disable-hang-monitor',
+  '--disable-ipc-flooding-protection',
+  '--disable-notifications',
+  '--disable-offer-store-unmasked-wallet-cards',
+  '--disable-popup-blocking',
+  '--disable-print-preview',
+  '--disable-prompt-on-repost',
+  '--disable-renderer-backgrounding',
+  '--disable-setuid-sandbox',
+  '--disable-sync',
+  '--hide-scrollbars',
+  '--ignore-gpu-blacklist',
+  '--metrics-recording-only',
+  '--mute-audio',
+  '--no-default-browser-check',
+  '--no-first-run',
+  '--no-pings',
+  '--no-sandbox',
+  '--no-zygote',
+  '--password-store=basic',
+  '--use-gl=swiftshader',
+  '--use-mock-keychain',
+];
 
 class Help {
+  
   async login(url: string = env.get('URL_HOADONDIENTU'), obj:any) {
             const browser = await puppeteer.launch({ headless: env.get('HEADLESS'),
                defaultViewport: null,
-               executablePath: '/usr/bin/chromium-browser',
-               args: ['--no-sandbox', '--disable-setuid-sandbox'] // Add these arguments
+               executablePath: env.get('executablePath'),
+               args: minimal_args
               }); // khởi tạo browser
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL
@@ -90,7 +127,7 @@ class Help {
               await this.clickMenuInvoice(".flex-space",page,'5','1');
             }    
           }  
-             await new Promise(resolve => setTimeout(resolve, 4000));                       
+             await new Promise(resolve => setTimeout(resolve, 2000));                       
              await page.waitForSelector(params.selector, { timeout: 2000 });   
             const rs = await page.$$eval(params.selector+' td', elements => {
               // Inside this function, you are in the browser's JavaScript environment
@@ -145,17 +182,20 @@ class Help {
                 }).catch(async (e)=> {
                   rs = [];
                 });  
-
+             let timeout = 2000;
+              if(total == 1){
+                timeout = 4000;
+              }
             if(i < total){
               // Click button next      
-              await new Promise(resolve => setTimeout(resolve, 4000)).then(async() => 
+              await new Promise(resolve => setTimeout(resolve, timeout)).then(async() => 
                  await page.waitForSelector(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)', { timeout: 2000 }),
                  await page.click(ele+' .anticon-right:not(.ant-tabs-tab-next-icon-target)') 
               );
               i++;
             }else if(i > total){
               // Click button prev 
-              await new Promise(resolve => setTimeout(resolve, 4000)).then(async() => 
+              await new Promise(resolve => setTimeout(resolve, timeout)).then(async() => 
               await page.waitForSelector(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)', { timeout: 2000 }),
               await page.click(ele+' .anticon-left:not(.ant-tabs-tab-next-icon-target)') 
               );
@@ -282,7 +322,7 @@ class Help {
          rs.downloadPath = path.join(process.cwd(), params.download);  
 
          // Tạo thư mục 
-          fs.mkdir(rs.downloadPath, (err) => {
+          fs.mkdir(rs.downloadPath, () => {
             //if (err) {
             //    console.error('Lỗi khi tạo thư mục:', err);
             // } else {
@@ -302,7 +342,9 @@ class Help {
          //console.log(imageItems);
           await page.waitForSelector(ele+params.selector, { timeout: 2000 }).then(async () => {
             const current_element = await page.$(ele+params.selector);          
-            await current_element.click();    
+            await current_element.click();             
+            
+            fs.rename(rs.downloadPath+'/DANH SÁCH HÓA ĐƠN.xlsx', rs.downloadPath+'/danh_sach_hoa_don.xlsx', () => {  });
             rs.status = true;  
           }).catch(() => {
             rs.status = false;  
@@ -341,33 +383,19 @@ class Help {
          let rs:any = [];
          let itemPage = parseInt(params.row)+((pageCurrent-1)*50);  
          //console.log(itemPage);       
-         rs.downloadPath = path.join(process.cwd(), params.download+'/temp/'+itemPage);  
-         rs.pdfPath = path.join(process.cwd(), params.download+'/pdf/'+itemPage); 
-         rs.xmlPath = path.join(process.cwd(), params.download+'/xml/'+itemPage);
-        
+         rs.link_download = params.download+'/temp/'+itemPage;
+         rs.downloadPath = path.join(process.cwd(), rs.link_download);  
+          
          // Tạo thư mục 
           await fs.mkdir(params.download+'/temp', (err) => {
           });
-          await fs.mkdir(params.download+'/pdf', (err) => {
-          });
-          await fs.mkdir(params.download+'/xml', (err) => {
-          });
+
            // Kiểm tra có file chưa nếu có thì xóa đi
           if (fs.existsSync(rs.downloadPath)) {
             await fs.rmSync(rs.downloadPath, { recursive: true, force: true });
           }   
-          if (fs.existsSync(rs.pdfPath)) {
-            await fs.rmSync(rs.pdfPath, { recursive: true, force: true });
-          }   
-          if (fs.existsSync(rs.xmlPath)) {
-            await fs.rmSync(rs.xmlPath, { recursive: true, force: true });
-          }   
           //
           await fs.mkdir(rs.downloadPath, (err) => {
-          });
-          await fs.mkdir(rs.pdfPath, (err) => {
-          });
-          await fs.mkdir(rs.xmlPath, (err) => {
           });
           
           // --- CRITICAL STEP: Configure the download behavior ---
@@ -387,26 +415,19 @@ class Help {
            // console.log(rs.downloadPath);   
            
            await new Promise(resolve => setTimeout(resolve, 5000));
-           createReadStream(rs.downloadPath+'/invoice.zip')
-          .pipe(unzipper.Extract({ path: rs.downloadPath }))
-          .promise()
-          .catch();
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          await fs.rename(rs.downloadPath+'/invoice.xml', rs.xmlPath+'/invoice.xml', function (err) {
-              if (err) throw err
-              //console.log('Successfully moved!')
-            });
+           await zl.extract(rs.downloadPath+'/invoice.zip', rs.downloadPath);
+
           // Chuyển đổi html sang pdf
            await new Promise(resolve => setTimeout(resolve, 2000));
            const browser1 = await puppeteer.launch({ 
                headless: env.get('HEADLESS'),
-               executablePath: '/usr/bin/chromium-browser',
-               args: ['--no-sandbox', '--disable-setuid-sandbox'] // Add these arguments
+               executablePath: env.get('executablePath'),
+               args: minimal_args // Add these arguments
               });
               const page1 = await browser1.newPage();    
               await page1.goto('file://'+rs.downloadPath+'/invoice.html');    
               await page1.pdf({
-                path: rs.pdfPath+'/invoice.pdf',
+                path: rs.downloadPath+'/invoice.pdf',
                 format: 'A4',
                 margin: {
                       top: "1in",
@@ -416,7 +437,12 @@ class Help {
                 }    
               });    
             await browser1.close();  
-          
+           await new Promise(resolve => setTimeout(resolve, 2000));
+            if (fs.existsSync(rs.downloadPath+'/invoice.zip')) {
+            await fs.rmSync(rs.downloadPath+'/invoice.zip', { recursive: true, force: true });
+          }   
+
+          await zl.archiveFolder(rs.downloadPath, rs.link_download+'.zip');
            rs.status = true;   
           }catch(e){
            rs.status = false;  
@@ -456,7 +482,8 @@ class Help {
          let itemPage = parseInt(params.row)+((pageCurrent-1)*50);  
          //console.log(itemPage);       
          rs.downloadPath = path.join(process.cwd(), params.download+'/temp/'+itemPage);  
-         rs.item_path = path.join(process.cwd(), params.download+'/'+params.type_file+'/'+itemPage); 
+         rs.link_download = params.download+'/'+params.type_file+'/'+itemPage;
+         rs.item_path = path.join(process.cwd(), rs.link_download); 
          
          // Tạo thư mục 
           await fs.mkdir(params.download+'/temp', (err) => {
@@ -493,10 +520,11 @@ class Help {
            // console.log(rs.downloadPath);   
            
            await new Promise(resolve => setTimeout(resolve, 5000));
-           createReadStream(rs.downloadPath+'/invoice.zip')
-          .pipe(unzipper.Extract({ path: rs.downloadPath }))
-          .promise()
-          .catch();
+           await zl.extract(rs.downloadPath+'/invoice.zip', rs.downloadPath);
+           //createReadStream(rs.downloadPath+'/invoice.zip')
+          //.pipe(unzipper.Extract({ path: rs.downloadPath }))
+          //.promise()
+          //.catch();
           if(params.type_file == 'xml'){
           await new Promise(resolve => setTimeout(resolve, 2000));
           await fs.rename(rs.downloadPath+'/invoice.xml', rs.item_path+'/invoice.xml', function (err) {
@@ -508,7 +536,8 @@ class Help {
            await new Promise(resolve => setTimeout(resolve, 2000));
            const browser1 = await puppeteer.launch({ 
                headless: env.get('HEADLESS'),
-               executablePath: '/usr/bin/chromium-browser'
+               executablePath: env.get('executablePath'),
+               args: minimal_args // Add these arguments
               });
               const page1 = await browser1.newPage();    
               await page1.goto('file://'+rs.downloadPath+'/invoice.html');    
@@ -526,7 +555,7 @@ class Help {
             }else{
               throw new Error('Loại file không hợp lệ');
             }      
-
+            await zl.archiveFolder(rs.item_path, rs.item_path+'.zip');
            rs.status = true;   
           }catch(e){
            rs.status = false;  
@@ -674,7 +703,11 @@ class Help {
   }
 
   async checkInvoice(url:string = env.get('URL_HOADONDIENTU'), obj:any, page_close = true ) {
-         const browser = await puppeteer.launch({ headless: env.get('HEADLESS') , defaultViewport: null, executablePath: '/usr/bin/chromium-browser' }); // khởi tạo browser, full screen
+         const browser = await puppeteer.launch({ headless: env.get('HEADLESS') ,
+           defaultViewport: null,
+           executablePath: env.get('executablePath'),
+           args: minimal_args // Add these arguments
+           }); // khởi tạo browser, full screen
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'domcontentloaded'}); // điều hướng trang web theo URL
             await page.click("button.ant-modal-close");

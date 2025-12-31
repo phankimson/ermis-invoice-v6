@@ -17,8 +17,7 @@ export default defineConfig({
     }),
   ],
   server: {
-      allowedHosts: true,
-        //['ermis.vn'], // Replace with your exact host
+      allowedHosts: ['ermis.vn','ermis.asia'], // Replace with your exact host
        // '.your-subdomain-wildcard.com', // Use a leading dot for subdomains
         // or true to allow all hosts (less secure)
       

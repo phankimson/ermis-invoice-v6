@@ -53,7 +53,6 @@
     "@adonisjs/session": "^7.7.0",
     "@adonisjs/static": "^1.1.1",
     "@adonisjs/vite": "^4.0.0",
-    "@types/unzipper": "^0.10.11",
     "cheerio": "^1.1.2",
     "edge.js": "^6.4.0",
     "exceljs": "^4.4.0",
@@ -62,7 +61,8 @@
     "puppeteer": "^24.33.0",
     "reflect-metadata": "^0.2.2",
     "svg-captcha": "^1.4.0",
-    "tesseract.js": "^7.0.0"
+    "tesseract.js": "^7.0.0",
+    "zip-lib": "^1.1.2"
   },
   "hotHook": {
     "boundaries": [

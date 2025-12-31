@@ -182,10 +182,8 @@ var Ermis = function () {
           await ErmisTemplateAjaxApi(null,url_get,
                 function(result){
                     if(type_file == 'all'){
-                     var xml_download = UrlString(result.link_xml_download);
-                     openDownload(xml_download);
-                     var pdf_download = UrlString(result.link_pdf_download);
-                     openDownload(pdf_download);
+                     var url_download = UrlString(result.link_download);
+                     openDownload(url_download);
                     }else if(type_file == 'xml' || type_file == 'pdf'){
                      var url_download = UrlString(result.link_download);
                      openDownload(url_download);

@@ -1,3 +1,6 @@
+.login_heading {
+  margin-top: 2em;
+}
 .login_page .pad_lock {
   width: 64px;
   height: 64px;
@@ -10,3 +13,8 @@
   background-position: 50% 1px;
 }
 
+.logo {
+    max-width: 200px;
+    margin: 0 auto;
+    padding: 1em;
+}
