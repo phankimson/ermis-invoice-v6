@@ -16,4 +16,11 @@ export default defineConfig({
       reload: ['resources/views/**/*.edge'],
     }),
   ],
+  server: {
+      allowedHosts: [
+        'ermis.vn', // Replace with your exact host
+       // '.your-subdomain-wildcard.com', // Use a leading dot for subdomains
+        // or true to allow all hosts (less secure)
+      ],
+    },
 })
