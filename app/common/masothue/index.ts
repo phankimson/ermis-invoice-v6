@@ -5,7 +5,7 @@ import puppeteer from 'puppeteer';
 class Search {
 
      async checkMST(url:string = env.get('URL_TRACUUNNT'), obj:any, page_close = true ) {
-                  const browser = await puppeteer.launch({ headless: env.get('HEADLESS') , defaultViewport: null , executablePath: '/usr/bin/chromium-browser' }); // khởi tạo browser, full screen
+                  const browser = await puppeteer.launch({ headless: env.get('HEADLESS') , defaultViewport: null , executablePath: '/usr/bin/chromium-browser' , args: ['--no-sandbox', '--disable-setuid-sandbox'] }); // khởi tạo browser, full screen
                   const page = await browser.newPage();  // tạo một trang web mới
                   await page.goto(url, {waitUntil: 'domcontentloaded'}); // điều hướng trang web theo URL
                   let selector = "#search";

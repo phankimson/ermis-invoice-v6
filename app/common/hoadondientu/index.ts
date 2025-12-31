@@ -12,7 +12,8 @@ class Help {
   async login(url: string = env.get('URL_HOADONDIENTU'), obj:any) {
             const browser = await puppeteer.launch({ headless: env.get('HEADLESS'),
                defaultViewport: null,
-               executablePath: '/usr/bin/chromium-browser'
+               executablePath: '/usr/bin/chromium-browser',
+               args: ['--no-sandbox', '--disable-setuid-sandbox'] // Add these arguments
               }); // khởi tạo browser
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL
@@ -50,7 +51,7 @@ class Help {
         let loginStatus = false;
          await page.waitForSelector(selector, { timeout: 1000 }).then(() => {
             loginStatus = true;
-          }).catch(e => {
+          }).catch(() => {
             loginStatus = false;  
           });
           return loginStatus;
@@ -244,7 +245,7 @@ class Help {
                     });
                   }); 
                   rs = {page_current: pageCurrent, total_page: total, data : data }
-                }).catch(async (e)=> {
+                }).catch(async ()=> {
                   rs = { page_current: 1, total_page: 1, data : [] };
                 });  
                 if(pageCurrent == page_invoice){
@@ -303,7 +304,7 @@ class Help {
             const current_element = await page.$(ele+params.selector);          
             await current_element.click();    
             rs.status = true;  
-          }).catch(e => {
+          }).catch(() => {
             rs.status = false;  
           });
        
@@ -399,7 +400,8 @@ class Help {
            await new Promise(resolve => setTimeout(resolve, 2000));
            const browser1 = await puppeteer.launch({ 
                headless: env.get('HEADLESS'),
-               executablePath: '/usr/bin/chromium-browser'
+               executablePath: '/usr/bin/chromium-browser',
+               args: ['--no-sandbox', '--disable-setuid-sandbox'] // Add these arguments
               });
               const page1 = await browser1.newPage();    
               await page1.goto('file://'+rs.downloadPath+'/invoice.html');    
