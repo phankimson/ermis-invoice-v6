@@ -132,8 +132,7 @@ export default class ApihoadondientuController {
             //session.forget("browserWSEndpoint");
         }
     }
-
-
+    
      public async file_invoice ({ response , session , params }: HttpContext ) {
         const help = new HDDT.default();
         params.url = env.get('URL_HOADONDIENTU')+'tra-cuu/tra-cuu-hoa-don';
@@ -143,9 +142,7 @@ export default class ApihoadondientuController {
         params.page_close = false;
         params.btn_selector = " .ant-row-flex-start #icon_ketxuat";
         params.download = 'downloads/'+session.get("mst");
-        const result:any = {};
-        result.link_download_pdf = params.download+'/pdf_invoice.zip';
-        result.link_download_xml = params.download+'/xml_invoice.zip';
+        const result:any = {};        
         //console.log(browserWSEndpoint);
         if(!params.browserWSEndpoint){
             response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
@@ -153,6 +150,8 @@ export default class ApihoadondientuController {
         }
         try {
             const rs = await help.fileInvoice(params);
+            result.link_xml_download = rs.xmlPath+'/invoice.xml';
+            result.link_pdf_download = rs.pdfPath+'/invoice.pdf';
              if(rs.status){  
                 result.message = "Tải file thành công";
                 response.json(result);  
@@ -178,15 +177,16 @@ export default class ApihoadondientuController {
         params.page_close = false;
         params.btn_selector = " .ant-row-flex-start #icon_ketxuat";
         params.download = 'downloads/'+session.get("mst");
-        const result:any = {};
-        result.link_download = params.download+'/'+params.type_file+'_invoice.zip';
+        const result:any = {};        
+
         //console.log(browserWSEndpoint);
         if(!params.browserWSEndpoint){
             response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
             return;
         }
         try {
-            const rs = await help.fileInvoice(params);
+            const rs = await help.fileTypeInvoice(params);
+            result.link_download = rs.item_path+'/invoice.'+params.type_file;
              if(rs.status){  
                 result.message = "Tải file thành công";
                 response.json(result);  

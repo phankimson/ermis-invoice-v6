@@ -33,8 +33,10 @@ router
 
             router.any('/excel-invoice/:invoice_group?/:invoice_type?/:start_date/:end_date', [ApiHoadondientuController, 'excel_invoice']).as('excel_invoice')
             
-            router.any('/file-invoice/:invoice_group?/:row', [ApiHoadondientuController, 'file_invoice']).as('file_invoice')   
+            router.any('/file-invoice/:invoice_group?/:row', [ApiHoadondientuController, 'file_invoice']).as('file_invoice')            
 
+            router.any('/file-type-invoice/:invoice_group?/:type_file/:row', [ApiHoadondientuController, 'file_type_invoice']).as('file_type_invoice')  
+           
             router.any('/info-user', [ApiHoadondientuController, 'info_user']).as('info_user')    
             
             router.any('/generate-key/:secret_key/:username/:password/:expiry_start_date/:expiry_end_date', [ApiHoadondientuController, 'generate_key']).as('generate_key')
@@ -93,8 +95,8 @@ router
 
     router.get('/login-key', [HoadondientuController, 'login_key']).as('login_key')
     })
-.prefix('hoadondientu')
-.as('hoadondientu')
+.prefix('invoice')
+.as('invoice')
 .use(middleware.check_secret_key())
 
 const HomeController = () => import('#controllers/home_controller')

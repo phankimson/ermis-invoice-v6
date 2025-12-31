@@ -38,6 +38,16 @@ var ErmisTemplateAjaxGetApi0 = function(e, url, callback_true, callback_false) {
     , true);
 };
 
+var ErmisTemplateAjaxApi = function(e, url, callback_true, callback_false,type) {
+    RequestURLMultiWaitingApi(url, function(result) {
+            callback_true(result);
+        },
+        function(result){
+            callback_false(result);
+        }
+    , type, true);
+};
+
 var ErmisTemplateAjaxPost1 = function(e, elem, url, callback_true, callback_false) {
     e.preventDefault();
     var data = GetAllValueForm(elem);

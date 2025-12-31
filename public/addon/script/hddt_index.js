@@ -8,6 +8,20 @@ var Ermis = function () {
         ErmisKendoDroplistTemplate('#invoice_type',false);
         jQuery("#load_invoice").on('click ', initLoadInvoice);
         jQuery("#download_excel").on('click ', initDownloadExcel);
+        jQuery("#download_pdf").on('click ', function(){initDownloadFile('pdf');});
+        jQuery("#download_xml").on('click ', function(){initDownloadFile('xml');});
+        jQuery("#download_all").on('click ', function(){initDownloadFile('all');});
+        initStatus(false);
+    }
+
+    var initStatus = function(status){
+        if(status == true){
+            jQuery(".btn-group-1,.btn-group-2").removeClass("disabled");
+            jQuery(".a-group-1,.a-group-2").removeClass("disabled");
+        }else{
+            jQuery(".btn-group-1,.btn-group-2").addClass("disabled");
+            jQuery(".a-group-1,.a-group-2").addClass("disabled");
+        }
     }
 
     var initLoadInfoUser = function(e){
@@ -43,6 +57,7 @@ var Ermis = function () {
                         arr = [];
                     };     
                   arr.push(result);
+                  initStatus(true);
                   key_search = invoice_group+'&'+invoice_type+'&'+start_date+'&'+end_date;
                 }                             
         },
@@ -149,7 +164,42 @@ var Ermis = function () {
                  kendo.alert(result);
                 }
             );
-        }    
+        } 
+        
+    var initDownloadFile = function(type_file){
+        var string_key = key_search.split('&');
+        var currentPage = jQuery("#grid_pagination_"+string_key[0]).pagination('getCurrentPage');
+        const resultObject = search("page_current",currentPage, arr);
+        var url_get = '';
+        $.each(resultObject.data, async function(index, value) {
+        if(type_file == 'all'){
+            url_get = UrlString("hddt/api/v1/file-invoice/"+string_key[0]+"/"+value[0]);
+        }else if(type_file == 'xml' || type_file == 'pdf'){
+            url_get = UrlString("hddt/api/v1/file-type-invoice/"+string_key[0]+"/"+type_file+"/"+value[0]);
+        }else{
+
+        }
+          await ErmisTemplateAjaxApi(null,url_get,
+                function(result){
+                    if(type_file == 'all'){
+                     var xml_download = UrlString(result.link_xml_download);
+                     openDownload(xml_download);
+                     var pdf_download = UrlString(result.link_pdf_download);
+                     openDownload(pdf_download);
+                    }else if(type_file == 'xml' || type_file == 'pdf'){
+                     var url_download = UrlString(result.link_download);
+                     openDownload(url_download);
+                    }else{
+                        kendo.alert("Không hỗ trợ định dạng này!");
+                        return;
+                    }
+                },
+                function(result){        
+                },"POST"
+              );         
+       });
+   
+    }
     
 
 

@@ -7,6 +7,7 @@ import fs from 'fs'
 import { createReadStream } from 'fs'
 import unzipper from 'unzipper'
 
+
 class Help {
   async login(url: string = env.get('URL_HOADONDIENTU'), obj:any) {
             const browser = await puppeteer.launch({ headless: env.get('HEADLESS') , defaultViewport: null}); // khởi tạo browser
@@ -339,16 +340,7 @@ class Help {
          rs.downloadPath = path.join(process.cwd(), params.download+'/temp/'+itemPage);  
          rs.pdfPath = path.join(process.cwd(), params.download+'/pdf/'+itemPage); 
          rs.xmlPath = path.join(process.cwd(), params.download+'/xml/'+itemPage);
-         // Xóa thư mục nếu tồn tại
-         if (fs.existsSync(params.download+'/temp')) {
-            await fs.rmSync(params.download+'/temp', { recursive: true, force: true });
-         }   
-          if (fs.existsSync(params.download+'/xml')) {
-            await fs.rmSync(params.download+'/xml', { recursive: true, force: true });
-         }   
-          if (fs.existsSync(params.download+'/pdf')) {
-            await fs.rmSync(params.download+'/pdf', { recursive: true, force: true });
-         }   
+        
          // Tạo thư mục 
           await fs.mkdir(params.download+'/temp', (err) => {
           });
@@ -356,6 +348,17 @@ class Help {
           });
           await fs.mkdir(params.download+'/xml', (err) => {
           });
+           // Kiểm tra có file chưa nếu có thì xóa đi
+          if (fs.existsSync(rs.downloadPath)) {
+            await fs.rmSync(rs.downloadPath, { recursive: true, force: true });
+          }   
+          if (fs.existsSync(rs.pdfPath)) {
+            await fs.rmSync(rs.pdfPath, { recursive: true, force: true });
+          }   
+          if (fs.existsSync(rs.xmlPath)) {
+            await fs.rmSync(rs.xmlPath, { recursive: true, force: true });
+          }   
+          //
           await fs.mkdir(rs.downloadPath, (err) => {
           });
           await fs.mkdir(rs.pdfPath, (err) => {
@@ -406,9 +409,6 @@ class Help {
               });    
             await browser1.close();  
           
-          // Xóa file 
-           await fs.rmSync(rs.downloadPath, { recursive: true, force: true });
-
            rs.status = true;   
           }catch(e){
            rs.status = false;  
@@ -448,32 +448,26 @@ class Help {
          let itemPage = parseInt(params.row)+((pageCurrent-1)*50);  
          //console.log(itemPage);       
          rs.downloadPath = path.join(process.cwd(), params.download+'/temp/'+itemPage);  
-         rs.pdfPath = path.join(process.cwd(), params.download+'/pdf/'+itemPage); 
-         rs.xmlPath = path.join(process.cwd(), params.download+'/xml/'+itemPage);
-         // Xóa thư mục nếu tồn tại
-         if (fs.existsSync(params.download+'/temp')) {
-            await fs.rmSync(params.download+'/temp', { recursive: true, force: true });
-         }   
-          if (fs.existsSync(params.download+'/xml')) {
-            await fs.rmSync(params.download+'/xml', { recursive: true, force: true });
-         }   
-          if (fs.existsSync(params.download+'/pdf')) {
-            await fs.rmSync(params.download+'/pdf', { recursive: true, force: true });
-         }   
+         rs.item_path = path.join(process.cwd(), params.download+'/'+params.type_file+'/'+itemPage); 
+         
          // Tạo thư mục 
           await fs.mkdir(params.download+'/temp', (err) => {
           });
-          await fs.mkdir(params.download+'/pdf', (err) => {
+          await fs.mkdir(params.download+'/'+params.type_file, (err) => {
           });
-          await fs.mkdir(params.download+'/xml', (err) => {
-          });
+          // Kiểm tra có file chưa nếu có thì xóa đi
+          if (fs.existsSync(rs.downloadPath)) {
+            await fs.rmSync(rs.downloadPath, { recursive: true, force: true });
+          }   
+          if (fs.existsSync(rs.item_path)) {
+            await fs.rmSync(rs.item_path, { recursive: true, force: true });
+          }   
+
           await fs.mkdir(rs.downloadPath, (err) => {
           });
-          await fs.mkdir(rs.pdfPath, (err) => {
+          await fs.mkdir(rs.item_path, (err) => {
           });
-          await fs.mkdir(rs.xmlPath, (err) => {
-          });
-          
+
           // --- CRITICAL STEP: Configure the download behavior ---
           const client = await page.target().createCDPSession()
           await client.send('Page.setDownloadBehavior', {
@@ -495,18 +489,20 @@ class Help {
           .pipe(unzipper.Extract({ path: rs.downloadPath }))
           .promise()
           .catch();
+          if(params.type_file == 'xml'){
           await new Promise(resolve => setTimeout(resolve, 2000));
-          await fs.rename(rs.downloadPath+'/invoice.xml', rs.xmlPath+'/invoice.xml', function (err) {
+          await fs.rename(rs.downloadPath+'/invoice.xml', rs.item_path+'/invoice.xml', function (err) {
               if (err) throw err
               //console.log('Successfully moved!')
-            });
+            });          
+          }else if(params.type_file == 'pdf'){
           // Chuyển đổi html sang pdf
            await new Promise(resolve => setTimeout(resolve, 2000));
            const browser1 = await puppeteer.launch();
               const page1 = await browser1.newPage();    
               await page1.goto('file://'+rs.downloadPath+'/invoice.html');    
               await page1.pdf({
-                path: rs.pdfPath+'/invoice.pdf',
+                path: rs.item_path+'/invoice.pdf',
                 format: 'A4',
                 margin: {
                       top: "1in",
@@ -514,11 +510,11 @@ class Help {
                       right: "1in",
                       bottom: "1in"
                 }    
-              });    
+              });         
             await browser1.close();  
-          
-          // Xóa file 
-           await fs.rmSync(rs.downloadPath, { recursive: true, force: true });
+            }else{
+              throw new Error('Loại file không hợp lệ');
+            }      
 
            rs.status = true;   
           }catch(e){

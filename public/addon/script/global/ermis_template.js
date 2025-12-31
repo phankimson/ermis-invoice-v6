@@ -86,3 +86,24 @@ function RequestURLWaitingApi(url, callback_true,callback_false, displayLoading)
             kendo.ui.progress(windowWidget, false);
         });
 }
+
+function RequestURLMultiWaitingApi(url, callback_true,callback_false, type ,displayLoading) {
+    var windowWidget = jQuery('body');
+    if (displayLoading) {
+        kendo.ui.progress(windowWidget, true);
+    }
+    jQuery.ajax({
+        url: url,
+        type : type,
+        async: false,
+        }).done(function(result) {
+             callback_true(result);
+            if (displayLoading) {
+                kendo.ui.progress(windowWidget, false);
+            }
+        })
+        .fail(function(xhr, textStatus) {
+            callback_false(xhr.responseText);
+            kendo.ui.progress(windowWidget, false);
+        });
+}
