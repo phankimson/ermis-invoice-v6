@@ -10,7 +10,10 @@ import unzipper from 'unzipper'
 
 class Help {
   async login(url: string = env.get('URL_HOADONDIENTU'), obj:any) {
-            const browser = await puppeteer.launch({ headless: env.get('HEADLESS') , defaultViewport: null}); // khởi tạo browser
+            const browser = await puppeteer.launch({ headless: env.get('HEADLESS'),
+               defaultViewport: null,
+               executablePath: '/usr/bin/chromium-browser'
+              }); // khởi tạo browser
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'load'}); // điều hướng trang web theo URL
             await page.waitForSelector('button.ant-modal-close', { visible : true });
@@ -394,7 +397,10 @@ class Help {
             });
           // Chuyển đổi html sang pdf
            await new Promise(resolve => setTimeout(resolve, 2000));
-           const browser1 = await puppeteer.launch();
+           const browser1 = await puppeteer.launch({ 
+               headless: env.get('HEADLESS'),
+               executablePath: '/usr/bin/chromium-browser'
+              });
               const page1 = await browser1.newPage();    
               await page1.goto('file://'+rs.downloadPath+'/invoice.html');    
               await page1.pdf({
@@ -498,7 +504,10 @@ class Help {
           }else if(params.type_file == 'pdf'){
           // Chuyển đổi html sang pdf
            await new Promise(resolve => setTimeout(resolve, 2000));
-           const browser1 = await puppeteer.launch();
+           const browser1 = await puppeteer.launch({ 
+               headless: env.get('HEADLESS'),
+               executablePath: '/usr/bin/chromium-browser'
+              });
               const page1 = await browser1.newPage();    
               await page1.goto('file://'+rs.downloadPath+'/invoice.html');    
               await page1.pdf({
@@ -663,7 +672,7 @@ class Help {
   }
 
   async checkInvoice(url:string = env.get('URL_HOADONDIENTU'), obj:any, page_close = true ) {
-         const browser = await puppeteer.launch({ headless: env.get('HEADLESS') , defaultViewport: null }); // khởi tạo browser, full screen
+         const browser = await puppeteer.launch({ headless: env.get('HEADLESS') , defaultViewport: null, executablePath: '/usr/bin/chromium-browser' }); // khởi tạo browser, full screen
             const page = await browser.newPage();  // tạo một trang web mới
             await page.goto(url, {waitUntil: 'domcontentloaded'}); // điều hướng trang web theo URL
             await page.click("button.ant-modal-close");
