@@ -335,10 +335,131 @@ class Help {
           //
          let rs:any = [];
          let itemPage = parseInt(params.row)+((pageCurrent-1)*50);  
-         console.log(itemPage);       
+         //console.log(itemPage);       
          rs.downloadPath = path.join(process.cwd(), params.download+'/temp/'+itemPage);  
          rs.pdfPath = path.join(process.cwd(), params.download+'/pdf/'+itemPage); 
-         rs.xmlPath = path.join(process.cwd(), params.download+'/xml/'+itemPage);   
+         rs.xmlPath = path.join(process.cwd(), params.download+'/xml/'+itemPage);
+         // Xóa thư mục nếu tồn tại
+         if (fs.existsSync(params.download+'/temp')) {
+            await fs.rmSync(params.download+'/temp', { recursive: true, force: true });
+         }   
+          if (fs.existsSync(params.download+'/xml')) {
+            await fs.rmSync(params.download+'/xml', { recursive: true, force: true });
+         }   
+          if (fs.existsSync(params.download+'/pdf')) {
+            await fs.rmSync(params.download+'/pdf', { recursive: true, force: true });
+         }   
+         // Tạo thư mục 
+          await fs.mkdir(params.download+'/temp', (err) => {
+          });
+          await fs.mkdir(params.download+'/pdf', (err) => {
+          });
+          await fs.mkdir(params.download+'/xml', (err) => {
+          });
+          await fs.mkdir(rs.downloadPath, (err) => {
+          });
+          await fs.mkdir(rs.pdfPath, (err) => {
+          });
+          await fs.mkdir(rs.xmlPath, (err) => {
+          });
+          
+          // --- CRITICAL STEP: Configure the download behavior ---
+          const client = await page.target().createCDPSession()
+          await client.send('Page.setDownloadBehavior', {
+            behavior: 'allow',
+            downloadPath: rs.downloadPath
+          });
+          //console.log(rs.downloadPath);
+          try{
+             // Get all row handles
+           const rows = await page.$$(ele+params.selector);
+             // Scroll the element into view
+           await rows[params.row-1].click();
+           const button_click = (await page.$$(ele+params.btn_selector));        
+           await button_click[1].click();          
+           // console.log(rs.downloadPath);   
+           
+           await new Promise(resolve => setTimeout(resolve, 5000));
+           createReadStream(rs.downloadPath+'/invoice.zip')
+          .pipe(unzipper.Extract({ path: rs.downloadPath }))
+          .promise()
+          .catch();
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          await fs.rename(rs.downloadPath+'/invoice.xml', rs.xmlPath+'/invoice.xml', function (err) {
+              if (err) throw err
+              //console.log('Successfully moved!')
+            });
+          // Chuyển đổi html sang pdf
+           await new Promise(resolve => setTimeout(resolve, 2000));
+           const browser1 = await puppeteer.launch();
+              const page1 = await browser1.newPage();    
+              await page1.goto('file://'+rs.downloadPath+'/invoice.html');    
+              await page1.pdf({
+                path: rs.pdfPath+'/invoice.pdf',
+                format: 'A4',
+                margin: {
+                      top: "1in",
+                      left: "1in",
+                      right: "1in",
+                      bottom: "1in"
+                }    
+              });    
+            await browser1.close();  
+          
+          // Xóa file 
+           await fs.rmSync(rs.downloadPath, { recursive: true, force: true });
+
+           rs.status = true;   
+          }catch(e){
+           rs.status = false;  
+          }     
+         if(params.page_close){
+            await page.close();
+          }  
+        return rs;
+    }
+
+
+    async fileTypeInvoice(params:any){
+       let page:any;
+        if(env.get('PAGE_REDIRECTION') == true){
+          page = await this.reconnect(params.url,params.browserWSEndpoint,'networkidle0');  //   
+          params.page_close = true;         
+        }else{
+          page = await this.reconnect(params.current_url,params.browserWSEndpoint,'networkidle0');  //  
+          if(params.url != params.current_url){
+            await this.clickMenuInvoice(".flex-space",page,'7','1');
+          } 
+        }            
+        let ele = "";
+           if(params.invoice_group == 1){
+            ele = ".ant-tabs-tabpane-active:first-child";
+           }else{
+            ele = ".ant-tabs-tabpane-active:nth-child(2)";
+           }         
+         // Define the download directory relative to the current working directory
+         // Tìm số page hiện tại
+          await page.waitForSelector(ele+' .styles__PageIndex-sc-eevgvg-3', { timeout: 2000 });
+          const textpageTotal = await page.$eval(ele+' .styles__PageIndex-sc-eevgvg-3', el => el.innerText);
+          let pageTotal = String(textpageTotal).split("/");
+          let pageCurrent = parseInt(pageTotal[0]);
+          //
+         let rs:any = [];
+         let itemPage = parseInt(params.row)+((pageCurrent-1)*50);  
+         //console.log(itemPage);       
+         rs.downloadPath = path.join(process.cwd(), params.download+'/temp/'+itemPage);  
+         rs.pdfPath = path.join(process.cwd(), params.download+'/pdf/'+itemPage); 
+         rs.xmlPath = path.join(process.cwd(), params.download+'/xml/'+itemPage);
+         // Xóa thư mục nếu tồn tại
+         if (fs.existsSync(params.download+'/temp')) {
+            await fs.rmSync(params.download+'/temp', { recursive: true, force: true });
+         }   
+          if (fs.existsSync(params.download+'/xml')) {
+            await fs.rmSync(params.download+'/xml', { recursive: true, force: true });
+         }   
+          if (fs.existsSync(params.download+'/pdf')) {
+            await fs.rmSync(params.download+'/pdf', { recursive: true, force: true });
+         }   
          // Tạo thư mục 
           await fs.mkdir(params.download+'/temp', (err) => {
           });

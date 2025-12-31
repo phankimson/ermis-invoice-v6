@@ -152,3 +152,10 @@ function search(nameKey, valueKey, myArray){
         }
     }
 }
+
+ function openDownload(link){
+      var popout = window.open(link);
+      window.setTimeout(function(){
+         popout.close();
+      }, 2000);
+}

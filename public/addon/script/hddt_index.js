@@ -141,13 +141,14 @@ var Ermis = function () {
         var url_get = UrlString("hddt/api/v1/excel-invoice/"+invoice_group+"/"+invoice_type+"/"+start_date+"/"+end_date);
             ErmisTemplateAjaxGetApi0(null,url_get,
             function(result){
-                 window.location.href = UrlString("hddt/api/v1/download-excel/",result);
-                 kendo.alert(result);
+                 var url_download = UrlString(result.link_download);
+                  openDownload(url_download);
+                  kendo.alert(result.message);
             },
             function(result){         
                  kendo.alert(result);
                 }
-          );
+            );
         }    
     
 

@@ -143,6 +143,9 @@ export default class ApihoadondientuController {
         params.page_close = false;
         params.btn_selector = " .ant-row-flex-start #icon_ketxuat";
         params.download = 'downloads/'+session.get("mst");
+        const result:any = {};
+        result.link_download_pdf = params.download+'/pdf_invoice.zip';
+        result.link_download_xml = params.download+'/xml_invoice.zip';
         //console.log(browserWSEndpoint);
         if(!params.browserWSEndpoint){
             response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
@@ -151,7 +154,42 @@ export default class ApihoadondientuController {
         try {
             const rs = await help.fileInvoice(params);
              if(rs.status){  
-                response.status(200).send("Tải file thành công");  
+                result.message = "Tải file thành công";
+                response.json(result);  
+               }else{
+                response.status(404).send("Tải file thất bại");     
+             }
+            session.put("current_url", params.url);
+            return;
+        } catch (err) {
+             session.put("current_url", params.url);  
+           response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
+           return; 
+            //session.forget("browserWSEndpoint");
+        }
+    }
+
+     public async file_type_invoice ({ response , session , params }: HttpContext ) {
+        const help = new HDDT.default();
+        params.url = env.get('URL_HOADONDIENTU')+'tra-cuu/tra-cuu-hoa-don';
+        params.current_url = session.get('current_url');
+        params.browserWSEndpoint = session.get("browserWSEndpoint");
+        params.selector = " .ant-tabs-tabpane-active .ant-table-row";
+        params.page_close = false;
+        params.btn_selector = " .ant-row-flex-start #icon_ketxuat";
+        params.download = 'downloads/'+session.get("mst");
+        const result:any = {};
+        result.link_download = params.download+'/'+params.type_file+'_invoice.zip';
+        //console.log(browserWSEndpoint);
+        if(!params.browserWSEndpoint){
+            response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
+            return;
+        }
+        try {
+            const rs = await help.fileInvoice(params);
+             if(rs.status){  
+                result.message = "Tải file thành công";
+                response.json(result);  
                }else{
                 response.status(404).send("Tải file thất bại");     
              }
@@ -173,7 +211,8 @@ export default class ApihoadondientuController {
         params.selector = " .ant-row-flex-start #icon_ketxuat";
         params.page_close = false;
         params.download = 'downloads/'+session.get("mst");
-        params.filename = 'DANH SÁCH HÓA ĐƠN.xlsx';
+        const result:any = {};
+        result.link_download = params.download+'/DANH SÁCH HÓA ĐƠN.xlsx';
         //console.log(browserWSEndpoint);
             if(!params.browserWSEndpoint){
                 response.status(401).send('Chưa đăng nhập vui lòng đăng nhập trước khi lấy thông tin');
@@ -184,7 +223,8 @@ export default class ApihoadondientuController {
             if(rs.status){    
             //const filePath = app.makePath(params.download+'/'+params.filename);            
             //await unlink(filePath);
-             response.status(200).send("Xuất excel thành công");      
+             result.message = "Xuất excel thành công";
+             response.json(result);      
             }else{
              response.status(404).send("Xuất excel thất bại");     
             }
