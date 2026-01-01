@@ -35,7 +35,7 @@ var Ermis = function () {
                 },
                 function(result){         
                      kendo.alert(result);
-                     window.location.href = 'login-key';
+                     window.location.href = 'invoice/login-key';
                 }
             );
     }
