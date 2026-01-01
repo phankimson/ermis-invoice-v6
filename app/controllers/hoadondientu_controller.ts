@@ -11,5 +11,10 @@ export default class HoadondientuController {
     public async login_key({ view ,session}: HttpContext) {
         session.forget("mst");
         return view.render('hoadondientu/login_key')
+    }    
+    
+    public async logout({ session, response}: HttpContext) {
+        session.forget("mst");
+        return response.redirect().toRoute('invoice.login_key')
     }     
 }

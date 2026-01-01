@@ -94,6 +94,7 @@ router
     router.get('/index', [HoadondientuController, 'index']).as('index')
 
     router.get('/login-key', [HoadondientuController, 'login_key']).as('login_key')
+    router.get('/logout', [HoadondientuController, 'logout']).as('logout')
     })
 .prefix('invoice')
 .as('invoice')
