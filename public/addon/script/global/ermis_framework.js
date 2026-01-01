@@ -169,3 +169,21 @@ function search(nameKey, valueKey, myArray){
          popout.close();
       }, 2000);
 }
+
+function convertNameTaxcode (name){
+    var arr = name.split(":");
+    var rs = [];
+    if(arr[1] != undefined && arr[2] != undefined){
+        var mst_text = arr[1].trimLeft().split(" ");
+        rs.name = arr[2];
+        if(mst_text[0] != undefined){
+          rs.tax_code = mst_text[0].replace("Tên","");
+        }
+    }else if(arr[1] != undefined){
+        rs.name = arr[1];
+        rs.tax_code = "";
+    }else{
+
+    }  
+    return rs;      
+}

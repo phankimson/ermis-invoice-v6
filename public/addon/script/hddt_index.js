@@ -11,6 +11,7 @@ var Ermis = function () {
         jQuery("#download_pdf").on('click ', function(){initDownloadFile('pdf');});
         jQuery("#download_xml").on('click ', function(){initDownloadFile('xml');});
         jQuery("#download_all").on('click ', function(){initDownloadFile('all');});
+        jQuery("#check_invoice").on('click ', initCheckInvoice);
         initStatus(false);
     }
 
@@ -93,35 +94,23 @@ var Ermis = function () {
     }
 
     var initLoadDataInvoice = function(data,invoice_group){
-             data.forEach(function(rs) {
+             data.forEach(function(rs,i) {
                      var clone = jQuery("#grid"+invoice_group+" tbody tr.hidden").first().clone(true);
-                     var name = '';
+                     var taxInfo = [];
                      clone.find("td").each(function(i) {
                      const $th = $(this);  
                      $th.text(rs[i]); 
                      if(i < 6){
-                        $th.text(rs[i]); 
+                        $th.text(rs[i]);
                      }else if(i == 6){
-                        var arr = rs[i].split(":");
-                        //console.log(arr);
-                        if(arr[1] != undefined && arr[2] != undefined){
-                            var mst_text = arr[1].trimLeft().split(" ");
-                            name = arr[2];
-                            if(mst_text[0] != undefined){
-                              $th.text(mst_text[0].replace("Tên","")); 
-                            }
-                        }else if(arr[1] != undefined){
-                             name = arr[1];
-                             $th.text(""); 
-                        }else{
-
-                        }                     
+                        taxInfo = convertNameTaxcode(rs[i]);       
+                        $th.text(taxInfo.tax_code);          
                      }else if(i == 7){
-                        $th.text(name);
+                        $th.text(taxInfo.name);
                      }else if(i == 16 || i == 17){
                         $th.text("");
                      }else{
-                        $th.text(rs[i-1]); 
+                        $th.text(rs[i-1]);
                      }
                   
                     });
@@ -192,14 +181,40 @@ var Ermis = function () {
                         return;
                     }
                 },
-                function(result){        
+                function(){        
                 },"POST"
               );         
        });
-   
     }
-    
 
+       var initCheckInvoice = async function(){
+          var string_key = key_search.split('&');
+          var currentPage = jQuery("#grid_pagination_"+string_key[0]).pagination('getCurrentPage');
+          const resultObject = search("page_current",currentPage, arr);
+          let url = 'hddt/api/v1/check-invoice/';
+          const urls = [];
+          $.each(resultObject.data, async function(index, value) {
+             var taxInfo = convertNameTaxcode(value[6]);     
+             var url_get = UrlString(url+taxInfo.tax_code+'/'+value[2]+'/'+value[4]+'/'+value[3]+'/'+value[8].replaceAll('.','')+'/'+value[11].replaceAll('.',''));
+             urls.push(url_get);
+          });
+          // Create an array of Promises by mapping each URL to a fetch() call
+           const requests = urls.map(url => fetch(url));
+
+           // Use Promise.all() to wait for all requests to resolve
+            Promise.all(requests)
+                .then(dataArray => {
+                    // dataArray is an array containing the JSON results of all three requests
+                    console.log('All data received:', dataArray);
+                    // Process all results here
+                })
+                .catch(error => {
+                    // If any single promise rejects (e.g., a network error or 404 status), 
+                    // Promise.all() immediately rejects with the first error encountered
+                    console.error('One of the requests failed:', error);
+                });
+       }
+   
 
 
     return {
