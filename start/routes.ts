@@ -58,7 +58,7 @@ router
       .group(() => {
         router
           .group(() => {
-            router.get('/check-mst/:tax_code',  [ApitracuunntController, 'check_mst']).as('check_mst') // final name
+            router.any('/check-mst/:tax_code',  [ApitracuunntController, 'check_mst']).as('check_mst') // final name
           })
           .prefix('v1')
           .as('v1')
@@ -76,7 +76,7 @@ router
       .group(() => {
         router
           .group(() => {
-            router.get('/check-mst/:tax_code',  [ApimasothueController, 'check_mst']).as('check_mst') // final name
+            router.any('/check-mst/:tax_code',  [ApimasothueController, 'check_mst']).as('check_mst') // final name
           })
           .prefix('v1')
           .as('v1')

@@ -15,6 +15,9 @@
 
     <!-- Bootstrap core CSS -->
     <link href="{{ asset('lib/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('lib/kendoui/styles/kendo.common.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('lib/kendoui/styles/kendo.material.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('lib/kendoui/styles/kendo.default.mobile.min.css') }}" />
 
     <!-- Additional CSS Files -->
     <link rel="stylesheet" href="{{ asset('home/css/fontawesome.css') }}">
@@ -80,14 +83,10 @@
                 <h6>Chào mừng đến với hệ sinh thái phần mềm Ermis</h6>
                 <h2>Ra mắt <a href="/invoice/login-key"><em>Ermis Invoice</em></a> <span>tra cứu</span> hóa đơn</h2>
                 
-                <form id="search" action="#" method="GET">
-                  <fieldset>
+                <div id="search">
                     <input type="tax_code" name="tax_code" class="tax_code" placeholder="Tìm thông tin mã số thuế" autocomplete="on" required>
-                  </fieldset>
-                  <fieldset>
-                    <button type="submit" id="check_mst" class="main-button">Tìm kiếm</button>
-                  </fieldset>
-                </form>
+                    <button id="check_mst" class="main-button">Tìm kiếm</button>
+                </div>
               </div>
             </div>
             <div class="col-lg-6">
@@ -325,11 +324,14 @@
   <!-- Scripts -->
   <script src="{{ asset('home/js/jquery.min.js') }}"></script>
   <script src="{{ asset('lib/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ asset('addon/script/global/ermis_framework.js') }}"></script>
+  <script src="{{ asset('addon/script/global/ermis_template.js') }}"></script>
   <script src="{{ asset('home/js/owl-carousel.js') }}"></script>
   <script src="{{ asset('home/js/animation.js') }}"></script>
   <script src="{{ asset('home/js/imagesloaded.js') }}"></script>
   <script src="{{ asset('home/js/home-custom.js') }}"></script>
   <script src="{{ asset('home/js/font-awesome.min.js') }}"></script>
-
+  <script src="{{ asset('lib/kendoui/js/kendo.all.min.js') }}"></script>
+  <script src="{{ asset('home/js/ermis_script.js') }}"></script>
 </body>
 </html>
