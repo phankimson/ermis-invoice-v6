@@ -1408,6 +1408,29 @@ form#contact button:hover {
   background-color: #fe3f40;
 }
 
+.scroll-to-top {
+    /* Position the button fixed at the bottom right corner */
+    position: fixed; /* */
+    bottom: 20px;
+    right: 20px;
+    
+    /* Basic styling for the button appearance */
+    background-color: #333;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-decoration: none; /* Remove default underline */
+    z-index: 99; /* Ensure it stays above other content */
+    cursor: pointer;
+    
+    /* Optional: Hide the button until the user scrolls down, using JavaScript */
+    /* display: none; */ 
+}
+
+.scroll-to-top:hover {
+    background-color: #555;
+}
+
 
 /* 
 ---------------------------------------------

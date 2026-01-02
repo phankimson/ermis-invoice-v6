@@ -18,13 +18,13 @@
 
     <!-- Additional CSS Files -->
     <link rel="stylesheet" href="{{ asset('home/css/fontawesome.css') }}">
-    <link rel="stylesheet" href="{{ asset('home/css/templatemo-space-dynamic.css') }}">
+    <link rel="stylesheet" href="{{ asset('home/css/home.css') }}">
     <link rel="stylesheet" href="{{ asset('home/css/animated.css') }}">
     <link rel="stylesheet" href="{{ asset('home/css/owl.css') }}">
   </head>
 
 <body>
-
+ <div id="dialog"></div>
   <!-- ***** Preloader Start ***** -->
   <div id="js-preloader" class="js-preloader">
     <div class="preloader-inner">
@@ -85,7 +85,7 @@
                     <input type="tax_code" name="tax_code" class="tax_code" placeholder="Tìm thông tin mã số thuế" autocomplete="on" required>
                   </fieldset>
                   <fieldset>
-                    <button type="submit" class="main-button">Tìm kiếm</button>
+                    <button type="submit" id="check_mst" class="main-button">Tìm kiếm</button>
                   </fieldset>
                 </form>
               </div>
@@ -177,7 +177,7 @@
                 <div class="card h-100 pricing-card shadow-sm">
                     <div class="card-body p-5">
                         <h5 class="card-title text-muted text-uppercase mb-4">Ermis Invoice</h5>
-                        <h1 class="display-5 mb-4">200.000<small class="text-muted fw-light">/tháng</small></h1>
+                        <h1 class="display-5 mb-4">100.000<small class="text-muted fw-light">/tháng</small></h1>
                         <ul class="list-unstyled feature-list">
                             <li><i class="fas fa-check-circle"></i> Tra cứu hóa đơn đầu ra/đầu vào</li>
                             <li><i class="fas fa-check-circle"></i> Tải bảng kê hóa đơn đầu ra/đầu vào</li>
@@ -309,14 +309,15 @@
       </div>
     </div>
   </div>
+  <a href="#top" class="scroll-to-top">
+  <i class="fa fa-arrow-up" aria-hidden="true"></i>
+</a>
 
   <footer>
     <div class="container">
       <div class="row">
         <div class="col-lg-12 wow fadeIn" data-wow-duration="1s" data-wow-delay="0.25s">
-          <p>© Copyright 2021 - Phần mềm Ermis
-          
-          <br>Phần mềm: <a rel="nofollow" href="https://ermis.io.vn">Ermis Solution</a></p>
+          <p>© Copyright 2026 - <a rel="nofollow" href="https://ermis.io.vn">Phần mềm Ermis</a>
         </div>
       </div>
     </div>
