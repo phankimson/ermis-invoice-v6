@@ -1,7 +1,12 @@
 var Ermis = function () {
+    var currentItem = 4;
+    var maxItem = 4;
+
     var initHomePage = function () {
         jQuery('#check_mst').on('click ', btnCheckMst);
         initDialog("#dialog","Kết quả kiểm tra MST","");
+        jQuery('.prev-btn').on('click ', initPrevItem);
+        jQuery('.next-btn').on('click ', initNextItem);
     }
 
      var btnCheckMst = function(e) {
@@ -18,16 +23,14 @@ var Ermis = function () {
                         if(i == result.length -2){
                         rs += '<tr><td colspan="2"><strong>' + result[i] + '</strong></td>';
                         } else if (i % 2 === 0 || i === 0) {
-                        rs += '<tr><td><strong>' + result[i] + '</strong></td>';
+                        rs += '<tr><td style="width: 30%;"><strong>' + result[i] + '</strong></td>';
                         }else {
-                        rs += '<td>' + result[i] + '</td></tr>';
+                        rs += '<td style="width: 70%;">' + result[i] + '</td></tr>';
                         }
                     }                   
                         rs += '</tbody></table>';
                     var dialog = $("#dialog").data("kendoWindow");
-                    dialog.center();
-                    dialog.content(rs);
-                    dialog.open();
+                    dialog.center().content(rs).open();
                 },
                 function(result){
                       kendo.alert(result);
@@ -60,9 +63,48 @@ var Ermis = function () {
             });
         }
 
+        var initShowItem = function (currentItem,maxItem){
+            jQuery('.solution_item').each(function(index, element){
+                if(currentItem <= maxItem){
+                    if(index < currentItem){
+                        jQuery(this).fadeIn();
+                    } else {
+                        jQuery(this).fadeOut();
+                    }
+                }else{
+                    if(index >= maxItem){
+                        jQuery(this).fadeIn();
+                    } else {
+                        jQuery(this).fadeOut();
+                    }
+                }
+
+            })
+        }
+
+        var initNextItem = function (){ 
+            currentItem = currentItem + 1;
+            if(currentItem > (jQuery('.solution_item').length)){
+                currentItem = (jQuery('.solution_item').length);
+            }else{
+                initShowItem(currentItem,maxItem);
+            }          
+        }
+
+        var initPrevItem = function (){ 
+            currentItem = currentItem - 1;
+            if(currentItem < maxItem){
+                currentItem = maxItem;
+            }else{
+                initShowItem(currentItem,maxItem);
+            }
+        
+        }
+
         return {
         init: function () {
             initHomePage();
+            initShowItem(currentItem,maxItem);
         }
 
     };

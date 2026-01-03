@@ -203,7 +203,20 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-lg-3 col-sm-6">
+          <div class="col-lg-3 col-sm-6 solution_item">
+          <a href="https://ermis.vn/invoice/login-key">
+            <div class="item wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.3s">
+              <div class="hidden-content">
+                <h4>Ermis Invoice</h4>
+                <p>Phần mềm hóa đơn đầu vào đầu ra</p>
+              </div>
+              <div class="showed-content">
+                <img src="{{ asset('addon/img/ermis-invoice.png') }}" alt="Phần mềm hóa đơn Ermis">
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-lg-3 col-sm-6 solution_item">
           <a href="https://ermis.io.vn/vi/acc/login">
             <div class="item wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.3s">
               <div class="hidden-content">
@@ -216,7 +229,7 @@
             </div>
           </a>
         </div>
-        <div class="col-lg-3 col-sm-6">
+        <div class="col-lg-3 col-sm-6 solution_item">
           <a href="https://ermis.io.vn/vi/pos/login">
             <div class="item wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.4s">
               <div class="hidden-content">
@@ -228,21 +241,8 @@
               </div>
             </div>
           </a>
-        </div>
-        <div class="col-lg-3 col-sm-6">
-          <a href="https://ermis.io.vn/vi/hrm/login">
-            <div class="item wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
-              <div class="hidden-content">
-                <h4>Ermis Hrm</h4>
-                <p>Phần mềm nhân sự dành cho các doanh nghiệp</p>
-              </div>
-              <div class="showed-content">
-                <img src="{{ asset('addon/img/ermis-hrm.png') }}" alt="Phần mềm nhân sự Ermis">
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col-lg-3 col-sm-6 ">
+        </div>        
+        <div class="col-lg-3 col-sm-6 solution_item">
           <a href="https://ermis.io.vn/vi/hotel/login">
             <div class="item wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.6s">
               <div class="hidden-content">
@@ -255,6 +255,38 @@
             </div>
           </a>
         </div>
+        <div class="col-lg-3 col-sm-6 solution_item">
+          <a href="https://ermis.io.vn/vi/hrm/login">
+            <div class="item wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+              <div class="hidden-content">
+                <h4>Ermis Hrm</h4>
+                <p>Phần mềm nhân sự dành cho các doanh nghiệp</p>
+              </div>
+              <div class="showed-content">
+                <img src="{{ asset('addon/img/ermis-hrm.png') }}" alt="Phần mềm nhân sự Ermis">
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-lg-3 col-sm-6 solution_item">
+          <a href="https://ermis.io.vn/vi/edu/login">
+            <div class="item wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.5s">
+              <div class="hidden-content">
+                <h4>Ermis Edu</h4>
+                <p>Phần mềm nhân sự dành cho trường học giáo dục</p>
+              </div>
+              <div class="showed-content">
+                <img src="{{ asset('addon/img/ermis-education.png') }}" alt="Phần mềm trường học giáo dục Ermis">
+              </div>
+            </div>
+          </a>
+        </div>
+         <div class="row text-center">
+         <div class="col-12 mt-4">
+          <a class="btn btn-primary btn-sm prev-btn"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i></a>          
+          <a class="btn btn-primary btn-sm next-btn"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i></a>
+          </div>
+         </div>
       </div>
     </div>
   </div>
@@ -326,7 +358,6 @@
   <script src="{{ asset('lib/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('addon/script/global/ermis_framework.js') }}"></script>
   <script src="{{ asset('addon/script/global/ermis_template.js') }}"></script>
-  <script src="{{ asset('home/js/owl-carousel.js') }}"></script>
   <script src="{{ asset('home/js/animation.js') }}"></script>
   <script src="{{ asset('home/js/imagesloaded.js') }}"></script>
   <script src="{{ asset('home/js/home-custom.js') }}"></script>

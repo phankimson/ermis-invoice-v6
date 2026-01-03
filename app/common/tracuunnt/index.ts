@@ -72,7 +72,7 @@ class Search {
                  const result:any = [];
                   result.data =  await this.loadCheckMST("#resultContainer tr", page);
                  if(page_close){
-                 await page.close();
+                 await browser.close();
                  }
                  result.browserWSEndpoint = browser.wsEndpoint();
                  return result;

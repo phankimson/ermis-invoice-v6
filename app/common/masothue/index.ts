@@ -54,7 +54,7 @@ class Search {
                   //await page.click(selector + " .btn-search-submit");
                   const result =  await this.loadCheckMST(".table-taxinfo tbody tr", page);
                   if(page_close){
-                  await page.close();
+                  await browser.close();
                   }
                   return result;
                  }

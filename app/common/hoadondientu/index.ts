@@ -712,18 +712,19 @@ class Help {
             await page.goto(url, {waitUntil: 'domcontentloaded'}); // điều hướng trang web theo URL
             await page.click("button.ant-modal-close");
 
+            await this.fillCheckInvoiceField(page,".home-tabs-search", obj);
             const text:string = await this.captcha(page,".home-tabs-search .Captcha__Image-sc-1up1k1e-1");
 
-            await this.fillCheckInvoice(".home-tabs-search", page, text, obj);
+            await this.fillCheckInvoice(".home-tabs-search", page, text);
             const result = await this.loadCheckInvoice(".styles__SearchContentBox-sc-1ljhobs-0", page);
             if(page_close){
-             await page.close();
+             await browser.close();
             }
             return result;
   }
 
-  async fillCheckInvoice(selector:string, page:any, text:string , obj: any ) {
-              // Type the credentials into the form fields
+  async fillCheckInvoiceField(page:any,selector:string, obj:any ) {
+    // Type the credentials into the form fields
             await page.waitForSelector(selector + " #nbmst",{ visible : true });
             await page.type(selector + " #nbmst", obj.tax_code, { delay: 100 }); // Replace tax code with the actual selector for the username/email input field
             await page.click(selector + ' .ant-select-selection__rendered');
@@ -736,6 +737,9 @@ class Help {
             await page.type(selector + " #tgtthue", obj.tax_amount.toString(), { delay: 100 }); // Replace tax amount with the actual selector for the password input field
             await page.waitForSelector(selector + " #tgtttbso",{ visible : true });
             await page.type(selector + " #tgtttbso", obj.amount.toString(), { delay: 100 }); // Replace amount with the actual selector for the password input field
+  }
+
+  async fillCheckInvoice(selector:string, page:any, text:string) {              
             await page.waitForSelector(selector + " #cvalue",{ visible : true });
             await page.type(selector + " #cvalue", text, { delay: 100 });
             // Click the "Sign In" button to complete the login process.

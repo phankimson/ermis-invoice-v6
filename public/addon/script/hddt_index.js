@@ -35,7 +35,7 @@ var Ermis = function () {
                 },
                 function(result){         
                      kendo.alert(result);
-                     window.location.href = 'invoice/login-key';
+                     window.location.href = 'login-key';
                 }
             );
     }
@@ -205,17 +205,36 @@ var Ermis = function () {
             Promise.all(requests)
                 .then(dataArray => {
                     // dataArray is an array containing the JSON results of all three requests
-                    console.log('All data received:', dataArray);
+                    //console.log('All data received:', dataArray);
                     // Process all results here
+                    let col = 17;
+                     $.each(dataArray, async function(index, value) {
+                        var a = jQuery("#grid"+string_key[0]+" tbody tr:not(.hidden):nth-child("+index+")");
+                        if(value.status != 200){
+                           var aheft = "<a class='reload_invoice' href=\"javascript:void(0)\"><i class=\"md-icon material-icons\"></i></a>";
+                           a.find("td:nth-child("+col+")").html(aheft); 
+                        }else{
+                        const rs = await value.json();
+                         if(rs[0] != undefined){
+                          var b = rs[0].slice(0, 15).trim();
+                          var spantext = '';
+                          if(b == "Tồn tại hóa đơn"){
+                            spantext = '<span class="uk-badge check_span" title="'+rs[0]+'-'+rs[1]+'">'+b+'</span>';
+                          }else{
+                            spantext = '<span class="uk-badge uk-badge-danger check_span" title="'+rs[0]+'-'+rs[1]+'">'+b+'</span>';
+                          }
+                          a.find("td:nth-child("+col+")").html(spantext);
+                         }
+                        }
+                       
+                   });
                 })
                 .catch(error => {
                     // If any single promise rejects (e.g., a network error or 404 status), 
                     // Promise.all() immediately rejects with the first error encountered
-                    console.error('One of the requests failed:', error);
+                    //console.error('One of the requests failed:', error);
                 });
        }
-   
-
 
     return {
 
