@@ -43,6 +43,7 @@ const minimal_args = [
 class Search {
 
     async checkMST(url:string = env.get('URL_TRACUUNNT'), obj:any, page_close = true ) {
+          try{
               const browser = await puppeteer.launch({ headless: env.get('HEADLESS') ,
                  defaultViewport: null ,
                  executablePath: env.get('executablePath'),
@@ -76,7 +77,9 @@ class Search {
                  }
                  result.browserWSEndpoint = browser.wsEndpoint();
                  return result;
-             
+              }catch(e){
+                return "Không thể kết nối đến máy chủ";
+              }
     }  
 
 

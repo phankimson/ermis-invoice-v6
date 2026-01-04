@@ -40,14 +40,33 @@ const minimal_args = [
 ];
 
 class Search {
+     async checkMstUrl(url:string = env.get('URL_TRACUUNNT'), obj:any, page_close = true ) {
+              const browser = await puppeteer.launch({ headless: env.get('HEADLESS') ,  args: minimal_args }); // khởi tạo browser, full screen
+              const page = await browser.newPage();         // tạo một trang web mới  
+              url = url + "Search/?type=auto&q="+obj.tax_code;
+              if(env.get('HEADLESS') == true){
+                await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36');
+                await page.setViewport({width:960,height:768});
+              }
+              await page.goto(url, {waitUntil: 'domcontentloaded'}); // điều hướng trang web theo URL
+              const result =  await this.loadCheckMST(".table-taxinfo tbody tr", page);
+            if(page_close){
+              await browser.close();
+              }
+              return result;        
+        }
 
      async checkMST(url:string = env.get('URL_TRACUUNNT'), obj:any, page_close = true ) {
-                  const browser = await puppeteer.launch({ headless: env.get('HEADLESS') ,
+                const browser = await puppeteer.launch({ headless: env.get('HEADLESS') ,
                      defaultViewport: null ,
                      executablePath: env.get('executablePath'),
                      args: minimal_args }); // khởi tạo browser, full screen
                   const page = await browser.newPage();  // tạo một trang web mới
-                  await page.goto(url, {waitUntil: 'domcontentloaded'}); // điều hướng trang web theo URL
+                  await page.goto(url, {waitUntil: "domcontentloaded"}); // điều hướng trang web theo URL
+                  if(env.get('HEADLESS') == true){
+                    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36');
+                    await page.setViewport({width:960,height:768});
+                  }
                   let selector = "#search";
                   await page.waitForSelector(selector,{ visible : true });
                   await page.type(selector, obj.tax_code, { delay: 100 }); 
@@ -56,8 +75,9 @@ class Search {
                   if(page_close){
                   await browser.close();
                   }
-                  return result;
-                 }
+                  return result;             
+                  
+         }
 
         async loadCheckMST(selector:string,page:any) { 
             await page.waitForSelector(selector, { visible : true });

@@ -15,7 +15,7 @@ var Ermis = function () {
                 kendo.alert("Vui lòng nhập Mã số thuế !");
                 return;
             }
-            var url = UrlString("mst/api/v1/check-mst/"+tax_code);
+            var url = UrlString("mst/api/v1/check-mst-url/"+tax_code);
             ErmisTemplateAjaxPostApi0(e,url,
                 function(result){
                     var rs = '<table class="table"><tbody>';

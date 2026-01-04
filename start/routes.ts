@@ -77,6 +77,7 @@ router
         router
           .group(() => {
             router.any('/check-mst/:tax_code',  [ApimasothueController, 'check_mst']).as('check_mst') // final name
+            router.any('/check-mst-url/:tax_code',  [ApimasothueController, 'check_mst_url']).as('check_mst_url') // final name
           })
           .prefix('v1')
           .as('v1')
