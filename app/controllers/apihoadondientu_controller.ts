@@ -281,7 +281,8 @@ export default class ApihoadondientuController {
         response.json(result);
         return
           } catch (err) {
-             response.status(502).send("Lỗi khi lấy xử lý dữ liệu "+err.message); 
+             params.message = "Lỗi khi lấy xử lý dữ liệu "+err.message;
+             response.status(502).send(params); 
             return; 
             //session.forget("browserWSEndpoint");
         }

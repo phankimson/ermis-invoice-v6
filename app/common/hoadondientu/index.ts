@@ -720,6 +720,7 @@ class Help {
             if(page_close){
              await browser.close();
             }
+            result.push(obj.invoice_no,obj.invoice_code);
             return result;
   }
 

@@ -107,3 +107,12 @@ function RequestURLMultiWaitingApi(url, callback_true,callback_false, type ,disp
             kendo.ui.progress(windowWidget, false);
         });
 }
+
+function windowWidgetProgress(displayLoading) {
+    var windowWidget = jQuery('body');
+    if (displayLoading) {
+        kendo.ui.progress(windowWidget, true);
+    } else {
+        kendo.ui.progress(windowWidget, false);
+    }
+}

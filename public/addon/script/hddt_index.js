@@ -97,6 +97,7 @@ var Ermis = function () {
              data.forEach(function(rs,i) {
                      var clone = jQuery("#grid"+invoice_group+" tbody tr.hidden").first().clone(true);
                      var taxInfo = [];
+                     var invoice_info = rs[3]+'-'+rs[4];
                      clone.find("td").each(function(i) {
                      const $th = $(this);  
                      $th.text(rs[i]); 
@@ -114,6 +115,7 @@ var Ermis = function () {
                      }
                   
                     });
+                    clone.attr("data-id",invoice_info);
                     clone.removeClass("hidden");
                     clone.insertAfter("#grid"+invoice_group+" tbody tr.hidden");
                 });  
@@ -208,26 +210,29 @@ var Ermis = function () {
                     //console.log('All data received:', dataArray);
                     // Process all results here
                     let col = 17;
-                     $.each(dataArray, async function(index, value) {
-                        var a = jQuery("#grid"+string_key[0]+" tbody tr:not(.hidden):nth-child("+index+")");
+                     $.each(dataArray, async function(index, value) {                       
                         if(value.status != 200){
+                           const rs = await value.json();
+                           var a = jQuery("#grid"+string_key[0]+" tbody tr[data-id='"+rs.invoice_code+'-'+rs.invoice_no+"']");  
                            var aheft = "<a class='reload_invoice' href=\"javascript:void(0)\"><i class=\"md-icon material-icons\"></i></a>";
                            a.find("td:nth-child("+col+")").html(aheft); 
-                        }else{
+                        }else{        
                         const rs = await value.json();
+                        var a = jQuery("#grid"+string_key[0]+" tbody tr[data-id='"+rs[3]+'-'+rs[2]+"']");            
                          if(rs[0] != undefined){
                           var b = rs[0].slice(0, 15).trim();
                           var spantext = '';
                           if(b == "Tồn tại hóa đơn"){
-                            spantext = '<span class="uk-badge check_span" title="'+rs[0]+'-'+rs[1]+'">'+b+'</span>';
+                            spantext = '<span class="uk-badge check_span" title="'+rs[0]+'-'+rs[1]+'-'+rs[2]+'">'+b+'</span>';
                           }else{
-                            spantext = '<span class="uk-badge uk-badge-danger check_span" title="'+rs[0]+'-'+rs[1]+'">'+b+'</span>';
+                            spantext = '<span class="uk-badge uk-badge-danger check_span" title="'+rs[0]+'-'+rs[1]+'-'+rs[2]+'">'+b+'</span>';
                           }
                           a.find("td:nth-child("+col+")").html(spantext);
                          }
                         }
                        
                    });
+                   kendo.alert("Đã kiểm tra hóa đơn xong!");
                 })
                 .catch(error => {
                     // If any single promise rejects (e.g., a network error or 404 status), 
