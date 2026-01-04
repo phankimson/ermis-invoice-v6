@@ -12,6 +12,7 @@ var Ermis = function () {
         jQuery("#download_xml").on('click ', function(){initDownloadFile('xml');});
         jQuery("#download_all").on('click ', function(){initDownloadFile('all');});
         jQuery("#check_invoice").on('click ', initCheckInvoice);
+        jQuery("#check_mst").on('click ', initCheckMst);
         initStatus(false);
     }
 
@@ -116,6 +117,7 @@ var Ermis = function () {
                   
                     });
                     clone.attr("data-id",invoice_info);
+                    clone.attr("data-mst",taxInfo.tax_code);
                     clone.removeClass("hidden");
                     clone.insertAfter("#grid"+invoice_group+" tbody tr.hidden");
                 });  
@@ -189,6 +191,22 @@ var Ermis = function () {
        });
     }
 
+    var initReloadInvoice = function(){
+        jQuery(".reload_invoice").on('click',function(e){
+        var string_key = key_search.split('&');
+        var url_check = UrlString(jQuery(e.currentTarget).data('check'));
+        ErmisTemplateAjaxPostApi0(null,url_check,
+            function(result){
+                let col = 17;
+                addTitleTrueCheckInvoice(string_key[0],result,col);
+            },
+            function(result){         
+                 kendo.alert(result.message);
+                });
+        });
+        
+    }
+
        var initCheckInvoice = async function(){
           var string_key = key_search.split('&');
           var currentPage = jQuery("#grid_pagination_"+string_key[0]).pagination('getCurrentPage');
@@ -210,25 +228,15 @@ var Ermis = function () {
                     //console.log('All data received:', dataArray);
                     // Process all results here
                     let col = 17;
-                     $.each(dataArray, async function(index, value) {                       
-                        if(value.status != 200){
-                           const rs = await value.json();
+                     $.each(dataArray, async function(index, value) {
+                             const rs = await value.json();                       
+                        if(value.status != 200){                      
                            var a = jQuery("#grid"+string_key[0]+" tbody tr[data-id='"+rs.invoice_code+'-'+rs.invoice_no+"']");  
-                           var aheft = "<a class='reload_invoice' href=\"javascript:void(0)\"><i class=\"md-icon material-icons\"></i></a>";
+                           var aheft = "<a class='reload_invoice' data-check='"+url+rs.tax_code+'/'+rs.invoice_type+'/'+rs.invoice_no+'/'+rs.invoice_code+'/'+rs.tax_amount+'/'+rs.amount+"' href=\"javascript:void(0)\"><i class=\"md-icon material-icons\"></i></a>";
                            a.find("td:nth-child("+col+")").html(aheft); 
+                           initReloadInvoice();
                         }else{        
-                        const rs = await value.json();
-                        var a = jQuery("#grid"+string_key[0]+" tbody tr[data-id='"+rs[3]+'-'+rs[2]+"']");            
-                         if(rs[0] != undefined){
-                          var b = rs[0].slice(0, 15).trim();
-                          var spantext = '';
-                          if(b == "Tồn tại hóa đơn"){
-                            spantext = '<span class="uk-badge check_span" title="'+rs[0]+'-'+rs[1]+'-'+rs[2]+'">'+b+'</span>';
-                          }else{
-                            spantext = '<span class="uk-badge uk-badge-danger check_span" title="'+rs[0]+'-'+rs[1]+'-'+rs[2]+'">'+b+'</span>';
-                          }
-                          a.find("td:nth-child("+col+")").html(spantext);
-                         }
+                        addTitleTrueCheckInvoice(string_key[0],rs,col);
                         }
                        
                    });
@@ -241,6 +249,87 @@ var Ermis = function () {
                 });
        }
 
+       var addTitleTrueCheckInvoice = function(gridId,rs,col){
+        var a = jQuery("#grid"+gridId+" tbody tr[data-id='"+rs[3]+'-'+rs[2]+"']");            
+            if(rs[0] != undefined){
+            var b = rs[0].slice(0, 15).trim();
+            var spantext = '';
+            if(b == "Tồn tại hóa đơn"){
+            spantext = '<span class="uk-badge check_span" title="'+rs[0]+'-'+rs[1]+'-'+rs[2]+'">'+b+'</span>';
+            }else{
+            spantext = '<span class="uk-badge uk-badge-danger check_span" title="'+rs[0]+'-'+rs[1]+'-'+rs[2]+'">'+b+'</span>';
+            }
+            a.find("td:nth-child("+col+")").html(spantext);
+            }
+       }
+
+       var initReloadMst = function(){
+        jQuery(".reload_mst").on('click',function(e){
+        var string_key = key_search.split('&');
+        var url_check = UrlString(jQuery(e.currentTarget).data('check'));
+        ErmisTemplateAjaxPostApi0(null,url_check,
+            function(result){
+                let col = 17;
+                addTitleTrueCheckMst(string_key[0],result,col);
+            },
+            function(result){         
+                 kendo.alert(result.message);
+                });
+        });
+        
+    }
+
+       var initCheckMst = function(){
+          var string_key = key_search.split('&');
+          var currentPage = jQuery("#grid_pagination_"+string_key[0]).pagination('getCurrentPage');     
+          const resultObject = search("page_current",currentPage, arr);
+          let url = 'mst/api/v1/check-mst-url/';
+          const urls = [];
+          $.each(resultObject.data, async function(index, value) {
+                var taxInfo = convertNameTaxcode(value[6]);
+                var url_get = UrlString(url+taxInfo.tax_code);
+                if(!urls.includes(url_get)){
+                  urls.push(url_get);
+                }
+          });
+          // Create an array of Promises by mapping each URL to a fetch() call
+           const requests = urls.map(url => fetch(url));
+              // Use Promise.all() to wait for all requests to resolve
+            Promise.all(requests)
+                .then(dataArray => {
+                    // dataArray is an array containing the JSON results of all three requests  
+                    let col = 18;
+                        $.each(dataArray, async function(index, value) {   
+                                const rs = await value.json();                        
+                            if(value.status != 200){                              
+                                 var a = jQuery("#grid"+string_key[0]+" tbody tr[data-mst='"+rs.tax_code+"']"); 
+                                 var aheft = "<a class='reload_mst' data-check='"+url+rs.tax_code+"' href=\"javascript:void(0)\"><i class=\"md-icon material-icons\"></i></a>";
+                                 a.find("td:nth-child("+col+")").html(aheft);
+                                 initReloadMst();
+                            }else{     
+                               addTitleTrueCheckMst(string_key[0],rs,col);
+                            }
+                       });
+                   kendo.alert("Đã kiểm tra mã số thuế xong!");
+                })
+                .catch(error => {
+                    // If any single promise rejects (e.g., a network error or 404 status), 
+                    // Promise.all() immediately rejects with the first error encountered
+                    //console.error('One of the requests failed:', error);
+                });     
+         }
+
+         var addTitleTrueCheckMst= function(gridId,rs,col){
+            var a = jQuery("#grid"+gridId+" tbody tr[data-mst='"+rs[1]+"']");
+            console.log(a);
+            var spantext = '';
+            if(rs[8] == "Đang hoạt động"){
+                spantext = '<span class="uk-badge check_span" title="'+rs[8]+'">'+rs[8]+'</span>';
+            }else{
+                spantext = '<span class="uk-badge uk-badge-danger check_span" title="'+rs[8]+'">'+rs[8]+'</span>';
+            }   
+            a.find("td:nth-child("+col+")").html(spantext);
+         }
     return {
 
         init: function () {
